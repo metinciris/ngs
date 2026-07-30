@@ -285,6 +285,24 @@ Bu doğrulama, kullanılan örnek dosya biçimleri için parser işlevini göste
 
 ## Sürüm geçmişi
 
+V1.6 
+
+- MSI yontem metnine degerlendirme kriterleri eklendi:
+  * MSI-stable: <%15
+  * MSI-low: %15-%40
+  * MSI-high: >%40
+- Otomatik MSI siniflandirmasi ayni esiklere gore guncellendi.
+- DNA sonucunda son cumle su sekilde degistirildi:
+  "Analiz edilen diger genlerde patolojik mutasyon saptanmamistir."
+- RNA sonucundan "diger genlerde patolojik mutasyon" cumlesi kaldirildi.
+- RNA fuzyon secimi dort hedef/grup ile sinirlandi:
+  * ROS1
+  * NTRK1, NTRK2 ve NTRK3
+  * FGFR-1, FGFR-2 ve FGFR-3
+  * ALK
+- Secilen RNA hedefi ustte bos bulgu satiri olarak birakilir ve ilgili
+  "fuzyon izlenmemistir" satiri otomatik kaldirilir.
+
 ### v1.5
 
 - `Solid Tümör Paneli` ifadesi `DNA Tümör Paneli` olarak değiştirildi.
