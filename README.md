@@ -1,148 +1,57 @@
-# NGS QC Raporlayıcı
+NGS QC RAPORLAYICI v2.2 - HIBRIT QC
+===================================
 
-**NGS QC Raporlayıcı**, DNA ve RNA dizileme kalite kontrol dosyalarını yerel bilgisayarda inceleyen ve patoloji raporunda kullanılabilecek standart Türkçe metinler oluşturan Tkinter tabanlı bir masaüstü uygulamasıdır.
+Bu sürüm iki veri kaynağını birlikte kullanır:
 
-Uygulama Altium/Zebra FASTQ istatistik raporlarını ve Cutadapt trimming çıktılarını aynı örnek altında birleştirir. Protokol numarası ile DNA/RNA türünü dosya adından otomatik tanır.
+1. İlk nesil Altium QC klasörü
+   - *.report.html
+   - *.trimming.report
+   - *.fq.fqStat.txt
+   - desteklenen TXT/HTML/CSV dosyaları
 
-```text
-99D_L01_227.report.html  → Protokol 99 / DNA
-99R_L01_234.report.html  → Protokol 99 / RNA
-```
+2. Analiz sonrası indirilen MultiQC JSON ZIP paketleri
+   - multiqc_data.zip
+   - multiqc_data (1).zip
+   - adı Windows tarafından değiştirilmiş diğer ZIP'ler
 
-## Özellikler
+KULLANIM
+--------
+1. Eski HTML/TXT QC dosyalarını ve indirdiğiniz MultiQC ZIP'lerini aynı klasöre koyabilirsiniz.
+2. ngs_qc_raporlayici_v2_2.pyw dosyasını çift tıklayın.
+3. Klasör Seç düğmesiyle klasörü gösterin.
+4. Program DNA ve RNA örneklerini ayrı tanır, aynı hastaya ait olanları birlikte gösterir.
+5. Tüm QC Cümlelerini Kopyala düğmesi, hasta başlığı altında önce DNA sonra RNA paragrafını verir.
 
-- DNA ve RNA örneklerini otomatik ayırır.
-- Aynı örneğe ait HTML, `fqStat.txt` ve `.trimming.report` dosyalarını birleştirir.
-- Paired-end okuma çifti, Q30, GC, temiz veri ve baz korunma oranını çıkarır.
-- DNA ve RNA için kopyalanabilir QC cümlesi üretir.
-- Genel Kanser Paneli ve Genel Füzyon Paneli standart metinlerini oluşturur.
-- TMB, MSI Percentage ve HRD Score alanlarını rapor cümlesine dönüştürür.
-- Mutasyon veya füzyon işaretlenen hedefe ait negatif sonucu otomatik kaldırır.
-- Pozitif bulgunun açıklamasını kullanıcıya bırakır; boş gen başlığı üretmez.
-- SDÜ Tıp Fakültesi veya DIŞ parafin blok kaynağını destekler.
-- Dört doktorlu imza bloğunu raporun en altına ekler.
-- Seçilen imza sahibini sağ alt köşeye yerleştirir.
-- Doktor isimlerini ve imza seçimini yerel ayar dosyasında saklar.
-- ZIP arşivlerini doğrudan, RAR arşivlerini WinRAR/UnRAR/7-Zip yardımıyla açabilir.
-- Verileri internete göndermez; analiz yerel bilgisayarda yapılır.
-- Yalnızca Python standart kütüphanesini kullanır.
+ÖNCELİK KURALI
+--------------
+- Aynı örnek için MultiQC ZIP mevcutsa okuma, Q30, GC, temiz veri ve post-alignment metriklerinde ZIP verisi kullanılır.
+- ZIP yoksa eski HTML/TXT/trimming dosyalarındaki veriler kullanılır.
+- Böylece MultiQC sayfası bozuk veya indirilemeyen RNA olgusu eski QC dosyalarıyla yine raporlanabilir.
 
-## Çalıştırma
+DNA / RNA EŞLEŞTİRME
+--------------------
+- ZIP dosya adı kullanılmaz.
+- Örnek kodu ve analiz kimliği ZIP içindeki JSON'dan okunur.
+- MP94-26--MP112-26 gibi bir kimlikte DNA protokolü MP94/26, RNA protokolü MP112/26 olarak gösterilir.
+- DNA ve RNA ham örnek numaraları farklı olsa bile aynı MultiQC analiz kimliği varsa aynı hasta altında birleştirilir.
+- MultiQC bulunmayan eski dosyalarda örnek adının başındaki protokol numarası kullanılır.
 
-Windows'ta aşağıdaki dosyaya çift tıklayın:
+RAPORLANAN QC METRİKLERİ
+------------------------
+- Paired-end okuma çifti
+- Q30 baz oranı
+- DNA için GC oranı
+- Filtreleme sonrası temiz veri miktarı
+- Ortalama kapsama derinliği
+- Medyan kapsama derinliği
+- En az 100x kapsanan hedef bölge oranı
+- Duplikasyon oranı (mevcutsa)
+- VerifyBAMID FREEMIX değeri (mevcutsa)
 
-```text
-ngs_qc_raporlayici_v1_9.pyw
-```
+NOT
+---
+RNA MultiQC paketlerinde Picard duplikasyon metriği bulunmayabilir. Bu durumda duplikasyon cümlesi yazılmaz; diğer post-alignment metrikleri raporlanır.
 
-Komut satırından:
-
-```bash
-python ngs_qc_raporlayici_v1_9.py
-```
-
-Pencere başlığında `NGS QC Raporlayıcı 1.9` yazmalıdır.
-
-## Kullanım
-
-1. **Klasör Seç** ile QC dosyalarının bulunduğu klasörü açın.
-2. Sol listeden protokolün DNA veya RNA satırını seçin.
-3. **Standart Metinler** sekmesine geçin.
-4. Blok kaynağını, blok numarasını ve tümör oranını girin.
-5. DNA için TMB, MSI Percentage ve HRD Score değerlerini girin.
-6. Pozitif mutasyon veya füzyon varsa ilgili hedefi işaretleyin. Uygulama yalnızca negatif cümleyi kaldırır; pozitif bulgu metni kullanıcı tarafından yazılır.
-7. İmza sahibini seçin. Seçilen doktor sağ altta yer alır.
-8. **Tüm Standart Metni Kopyala** düğmesine basın.
-9. Metni Notepad veya raporlama sistemine yapıştırın.
-10. `-------------` çizgisinin üzerindeki teknik bölümü klinik rapora aktarmayın.
-
-## Doktor isimlerinin kaydedilmesi
-
-Doktor isimleri arayüzde bir kez düzenlenip **Doktor isimlerini kaydet** düğmesine basılarak saklanabilir. Uygulama kapanırken güncel isimler ve imza seçimi ayrıca sessizce kaydedilir.
-
-Windows kayıt yeri:
-
-```text
-%APPDATA%\NGS_QC_Raporlayici\settings.json
-```
-
-Linux kayıt yeri:
-
-```text
-~/.config/NGS_QC_Raporlayici/settings.json
-```
-
-Bu dosya proje veya GitHub deposunun içine yazılmaz. Hasta/protokol bilgileri ayar dosyasına kaydedilmez.
-
-## İmza düzeni
-
-Dört doktor iki satır halinde yerleştirilir. İmza sahibi olarak seçilen doktor her zaman ikinci satırın sağında bulunur. Diğer üç doktorun yerleşimi kurumsal düzene göre otomatik değiştirilir.
-
-## Desteklenen dosyalar
-
-```text
-.html
-.htm
-.txt
-.log
-.report
-.csv
-.tsv
-.zip
-.rar
-```
-
-Örnek Altium dosyaları:
-
-```text
-99D_L01_227.report.html
-99D_L01_227.trimming.report
-99D_L01_227_1.fq.fqStat.txt
-99D_L01_227_2.fq.fqStat.txt
-```
-
-Ham dizileme ve varyant dosyaları analiz edilmez:
-
-```text
-.fastq
-.fq
-.fastq.gz
-.fq.gz
-.bam
-.cram
-.vcf
-```
-
-## Otomatik sınıflama
-
-```text
-MSI-stable: <%15
-MSI-Low:    %15–40
-MSI-High:   >%40
-
-TMB-L:      <10 mut/Mb
-TMB-H:      ≥10 mut/Mb
-```
-
-Bu sınırlar uygulamada sabittir ve laboratuvarın valide edilmiş raporlama yaklaşımına göre tanımlanmıştır.
-
-## Sınırlamalar
-
-- Uygulama FASTQ/trimming kalite özetini raporlar; mapping, on-target oranı, unique depth, coverage uniformity ve biyoinformatik kontrol sonuçlarının yerine geçmez.
-- Üretilen metin kullanıcı tarafından kontrol edilmeden klinik rapora aktarılmamalıdır.
-- Pozitif varyant ve füzyon açıklamaları uygulama tarafından oluşturulmaz.
-- RAR desteği için bilgisayarda WinRAR, UnRAR veya 7-Zip bulunmalıdır.
-
-## Gizlilik
-
-Analiz edilen QC dosyaları harici bir sunucuya gönderilmez. İşlem yerel bilgisayarda gerçekleşir. GitHub deposuna gerçek hasta, protokol, varyant veya QC dosyaları eklenmemelidir.
-
-## Sürüm
-
-### v1.9
-
-- Yerel olarak kaydedilen doktor isimleri ve imza sahibi seçimi eklendi.
-- İmza sahibinin sağ altta olduğu dört kurumsal dizilim eklendi.
-- Pozitif hedef seçimlerinde boş mutasyon/füzyon başlıkları kaldırıldı.
-- DNA yöntem adı `Genel Kanser Paneli` olarak düzenlendi.
-- Dış blok kaynağı `DIŞ`, HRD sonucu `HRD skoru` biçiminde standardize edildi.
+GEREKSİNİM
+----------
+Python 3.10 veya üzeri. Harici Python paketi gerekmez.
