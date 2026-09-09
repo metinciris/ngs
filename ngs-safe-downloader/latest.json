@@ -1,0 +1,13 @@
+{
+  "version": "2.0",
+  "app_sha256": "81474e9f4389f6bd9b87cdccfbded6c2404b2f79c17684a2481009c8dee2a6c9",
+  "package_sha256": "607911154a46098d1786846c998d917e6056e0fa26817282f0c53515de42f036",
+  "parts": [
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/pkg_part_00.b64",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/pkg_part_01.b64",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/pkg_part_02.b64",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/pkg_part_03.b64",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/pkg_part_04.b64"
+  ],
+  "notes": "GitHub otomatik guncelleme kanali; v1.9 otomatik onarim ve NGS dogrulama ozellikleri korunur."
+}
