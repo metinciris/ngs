@@ -3,14 +3,14 @@
   "app_sha256": "1a538b6d7e537cba82f672edb5bb1a8d0ae9be4db8a4dbbf3b405887223f9425",
   "package_sha256": "c6ae63e1f02d16523bcfadacfab623bbe5656bb1f62fd72a619ef06ac5c4f444",
   "parts": [
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_00.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_01.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_02.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_03.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_04.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_05.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_06.b64",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_07.b64"
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_00.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_01.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_02.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_03.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_04.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_05.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_06.b64?rev=20260910fix1",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.4/pkg_part_07.b64?rev=20260910fix1"
   ],
-  "notes": "v2.4: yeni ana dashboard; canlı bağlantı, internet hızı, toplam/tamam/kalan, hata/redownload kuyruğu, ETA; ayrıntılı dosya, doğrulama, karşılaştırma ve log sekmeleri."
+  "notes": "v2.4 dashboard. Paket parçaları 2026-09-10 tarihinde yeniden doğrulandı; indirme URL'leri önbellek kırıcı rev parametresiyle güncellendi."
 }
