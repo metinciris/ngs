@@ -15,13 +15,14 @@ echo GitHub guncelleme kontrolu yapiliyor...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference='Stop';" ^
   "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;" ^
-  "$m=Invoke-RestMethod -Uri '%MANIFEST%' -TimeoutSec 12;" ^
+  "$m=Invoke-RestMethod -Uri '%MANIFEST%?t=' + [DateTimeOffset]::UtcNow.ToUnixTimeSeconds() -TimeoutSec 15;" ^
   "$expectedApp=([string]$m.app_sha256).ToLower();" ^
   "$local=''; if(Test-Path '%APP%'){$local=(Get-FileHash '%APP%' -Algorithm SHA256).Hash.ToLower()};" ^
   "if($local -eq $expectedApp){Write-Host ('Guncel surum: v'+$m.version); exit 0};" ^
   "Write-Host ('Yeni surum bulundu: v'+$m.version);" ^
-  "$sb=New-Object System.Text.StringBuilder; foreach($u in $m.parts){$t=(Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 30).Content; [void]$sb.Append($t.Trim())};" ^
-  "[IO.File]::WriteAllBytes('%PKG%', [Convert]::FromBase64String($sb.ToString()));" ^
+  "$sb=New-Object System.Text.StringBuilder; $n=0; foreach($u in $m.parts){$n++; Write-Host ('Paket parcasi '+$n+'/'+$m.parts.Count+' indiriliyor...'); $t=(Invoke-WebRequest -Uri $u -UseBasicParsing -TimeoutSec 45).Content; $clean=([string]$t) -replace '[^A-Za-z0-9+/=]',''; [void]$sb.Append($clean)};" ^
+  "$b64=$sb.ToString(); if(($b64.Length %% 4) -ne 0){throw ('Base64 paket uzunlugu gecersiz: '+$b64.Length)};" ^
+  "[IO.File]::WriteAllBytes('%PKG%', [Convert]::FromBase64String($b64));" ^
   "$pkgHash=(Get-FileHash '%PKG%' -Algorithm SHA256).Hash.ToLower();" ^
   "if($pkgHash -ne ([string]$m.package_sha256).ToLower()){Remove-Item '%PKG%' -Force -ErrorAction SilentlyContinue; throw 'Paket SHA-256 dogrulamasi basarisiz. Eski surum korunuyor.'};" ^
   "Remove-Item '%TMPDIR%' -Recurse -Force -ErrorAction SilentlyContinue; New-Item -ItemType Directory -Path '%TMPDIR%' | Out-Null;" ^
@@ -36,21 +37,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 
 if errorlevel 1 (
   echo GitHub guncelleme kontrolu yapilamadi veya guncelleme reddedildi.
-  echo Mevcut yerel surumle devam ediliyor.
+  echo Mevcut yerel surum varsa onunla devam ediliyor.
 )
 
 echo.
 where py >nul 2>nul
 if %errorlevel%==0 (
     py -c "import requests" >nul 2>nul || py -m pip install --user requests
-    py "%APP%"
+    if exist "%APP%" py "%APP%"
+    if not exist "%APP%" echo Uygulama dosyasi indirilemedi. Internet baglantisini kontrol edip tekrar deneyin.
     goto :end
 )
 
 where python >nul 2>nul
 if %errorlevel%==0 (
     python -c "import requests" >nul 2>nul || python -m pip install --user requests
-    python "%APP%"
+    if exist "%APP%" python "%APP%"
+    if not exist "%APP%" echo Uygulama dosyasi indirilemedi. Internet baglantisini kontrol edip tekrar deneyin.
     goto :end
 )
 
