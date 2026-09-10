@@ -1,6 +1,20 @@
 # NGS Safe Downloader
 
-Windows üzerinde Gen Cloud Drive / Nextcloud public WebDAV üzerinden büyük NGS ham verilerini güvenli indirmek için hazırlanmış araç.
+Windows üzerinde büyük NGS ham verilerini daha güvenli ve kesintiye dayanıklı biçimde indirmek için hazırlanmış araçtır. Özellikle Nextcloud public WebDAV paylaşımlarında dosyaları tek tek indirir, yarım kalan aktarımları yönetir ve indirme sonrasında bütünlük kontrolleri uygular.
+
+> Bu araç fiziksel HDD/SSD tesliminin yerine geçtiği iddiasında değildir. Amaç, ağ üzerinden yapılan büyük veri aktarımlarında kopma, eksik dosya ve sessiz veri bozulması riskini azaltmaktır.
+
+## Temel özellikler
+
+- Kesilen indirmeleri `.part` dosyalarından sürdürebilme
+- Adaptif paralel bağlantı ve sunucu koruma modu
+- Eksik veya hatalı dosyaları otomatik yeniden indirme
+- Dosya boyutu kontrolü
+- Vendor MD5/SHA checksum doğrulaması
+- Yerel SHA-256 kayıtları
+- Opsiyonel derin FASTQ.GZ / GZIP CRC bütünlük testi
+- İndirme ve doğrulama sonuçlarını `_NGS_RAPOR` klasöründe saklama
+- Oturum başlangıç/bitiş zamanı, süre ve final durum özeti
 
 ## Kurulum / kurtarma
 
@@ -10,14 +24,14 @@ Windows üzerinde Gen Cloud Drive / Nextcloud public WebDAV üzerinden büyük N
 4. `NGS_Safe_Downloader.py` yerelde yoksa otomatik kurulur; eskiyse güncellenir.
 5. Bir önceki uygulama `NGS_Safe_Downloader.previous.py` olarak saklanır.
 
-GitHub erişilemiyorsa güncelleme kontrolü başarısız olur fakat yerelde mevcut uygulama varsa onunla çalışmaya devam eder. NGS indirme işi güncelleme servisine bağımlı değildir.
+GitHub erişilemiyorsa güncelleme kontrolü atlanır; yerelde mevcut uygulama varsa çalışmaya devam eder. NGS veri aktarımı güncelleme servisine bağımlı değildir.
 
 ## Güncel sürüm
 
 v2.0
 
-v2.0 ile kalıcı GitHub güncelleme kanalı eklendi. v1.9'daki adaptif indirme, sunucu koruma modu, `.part` devam desteği, `_NGS_PARCA`, otomatik hata onarımı, vendor MD5/SHA doğrulama ve opsiyonel derin FASTQ.GZ CRC kontrolü korunmuştur.
-
 ## Kullanım notu
 
 Normal kullanımda programı doğrudan Python dosyasından değil `BASLAT_NGS_INDIRICI.bat` üzerinden açın; otomatik sürüm kontrolü bu başlatıcıda yapılır.
+
+Bu depoda herhangi bir kurum/şirket adına ait örnek veri indirme bağlantısı veya gerçek paylaşım adresi tutulmaz.
