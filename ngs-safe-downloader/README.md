@@ -11,6 +11,24 @@ Windows üzerinde büyük NGS ham verilerini kesintiye dayanıklı ve doğrulana
 - Eksik, boyutu hatalı, checksum uyuşmazlığı olan veya FASTQ.GZ bütünlük kontrolünden geçmeyen dosyaları otomatik yeniden indirir.
 - Final sorun sayısı sıfır olmadan işi `TAMAMLANDI` olarak işaretlemez.
 
+## v2.4 ana ekran
+
+Ana ekran teknik log okumadan izlenebilen sade bir sistem bakım / disk onarım dashboard'u olarak düzenlendi.
+
+- Paylaşım bağlantısının yanında canlı bağlantı durumu: bağlanıyor / bağlı / bekleniyor / hata
+- Anlık internet hızı ve aktif bağlantı sayısı
+- Toplam veri ve dosya sayısı
+- Tamamlanan dosya / veri miktarı
+- Kalan dosya / veri miktarı ve yarım dosya sayısı
+- Hatalı dosya sayısı
+- Otomatik yeniden indirilecek dosya kuyruğu ve yeniden indirilen dosya sayısı
+- Büyük genel ilerleme çubuğu
+- Tahmini bitiş saati ve kalan süre
+- Geçen süre
+- `İndirme / Devam`, `Doğrulama`, `Hatalıları Düzelt` aşamalarının ayrı canlı durumu
+
+Ayrıntılar gerektiğinde sekmelerden görülebilir: `Dosya görünümü`, `Hatalar / yeniden indirme`, `Canlı doğrulama`, `Disk karşılaştırma`, `Canlı log`. Yollar ve bakım seçenekleri ana ekranı kalabalıklaştırmaması için açılır ayrıntı alanında tutulur.
+
 ## Doğrulama
 
 Tam otomatik modda kullanıcı ayrıca doğrulama seçmek zorunda değildir:
@@ -27,7 +45,7 @@ Programın bulunduğu diskin şişmemesi özellikle gözetilir.
 - Hedef veri klasörü: yalnız gerçek indirilen dosyalar
 - Hedef harici diskte `_NGS_PARCA`: yarım indirmeler
 - Hedef harici diskte `_NGS_WORK`: log, manifest, doğrulama ve karşılaştırma raporları
-- Program/sistem tarafında yalnız küçük ayar ve son iş bilgileri
+- Program/sistem tarafında yalnız uygulama, başlatıcı ve çok küçük ayar/son iş bilgileri
 
 İstenirse, iş tamamen ve hatasız bittikten sonra çalışma kayıtları temizlenebilir.
 
@@ -35,12 +53,7 @@ Programın bulunduğu diskin şişmemesi özellikle gözetilir.
 
 Ağ üzerinden indirilen veri ile fiziksel HDD/SSD üzerinde gelen kopya karşılaştırılabilir. Önce göreli dosya yolu ve boyut kontrol edilir; aynı boyuttaki dosya çiftleri SHA-256 ile baştan sona okunur.
 
-Arayüzde HDD inceleme araçlarına benzer küçük durum kareleri kullanılır:
-
-- Yeşil: SHA-256 birebir aynı
-- Kırmızı: boyut veya içerik farklı
-- Sarı: yalnız bir tarafta
-- Gri: henüz kontrol edilmedi
+Arayüzde HDD inceleme araçlarına benzer küçük durum kareleri kullanılır: yeşil birebir aynı, kırmızı farklı, sarı yalnız bir tarafta, gri henüz kontrol edilmedi.
 
 Karşılaştırma raporu da harici diskteki `_NGS_WORK/Comparisons` alanında tutulur.
 
@@ -54,6 +67,6 @@ Karşılaştırma raporu da harici diskteki `_NGS_WORK/Comparisons` alanında tu
 
 ## Güncel sürüm
 
-**v2.3**
+**v2.4**
 
 Bu depoda herhangi bir kurum/şirkete ait gerçek veya örnek NGS paylaşım bağlantısı tutulmaz.
