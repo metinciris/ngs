@@ -1,7 +1,7 @@
 # PROJECT STATE — NGS Mutasyon Havuzu
 
-**Public source version:** 0.2.4  
-**Status:** collector + archive + mutation viewer + POOL spread analysis are operational.
+**Public source version:** 0.2.5  
+**Status:** collector + archive + mutation viewer + POOL spread analysis + local AI/reporting package export are operational.
 
 This file is intentionally maintained as a restart point. If the local project directory or the development chat is lost, start here.
 
@@ -64,6 +64,19 @@ Readiness rules:
 
 The application must not label contamination as proven solely from these heuristics.
 
+## AI / reporting package
+
+The **YZ / Raporlama** tab creates a local POOL bundle for reporting review. It groups DNA/RNA runs sharing the same POOL number and exports:
+
+- POOL-level exact shared variant signals, high→low AF signals and multi-variant sample-pair signatures.
+- Per-patient diagnosis, age at diagnosis, block, tumor percentage and technical sample/rerun context.
+- TMB/MSI/HRD and available QC General Stats.
+- Oncogenic and Likely Oncogenic calls, including non-PASS observations for technical spread review.
+- Clinical summary/raw JSON and optional full MultiQC exported JSON.
+- A compact Markdown prompt plus compact/full JSON files.
+
+Direct identifiers (name/national ID) are OFF by default. `AI_EXPORT/` is local-only and git-ignored. The package is decision-support input; it must not make an autonomous contamination or final clinical reporting decision.
+
 ## Patient/block metadata
 
 Case-family level:
@@ -87,7 +100,7 @@ Physician fields offer suggestions from previously entered local values.
 
 ## Next priorities
 
-1. Integrate QC/read-quality metrics more directly into exact-variant spread scoring.
+1. Integrate QC/read-quality metrics more directly into exact-variant spread scoring and AI risk prioritization.
 2. Make rerun comparison explicit: original vs rerun AF/DP/filter concordance.
 3. Improve global mutation result drill-down and longitudinal/pool summaries.
 4. Add a safe local backup/export workflow for patient data without sending PHI to the public repository.
@@ -100,7 +113,7 @@ The public repository must never contain:
 - Patient names or national IDs.
 - Real sample/run UUIDs.
 - Real downloaded TSV/JSON/MultiQC contents.
-- `DATA/`, `OUTPUT/`, `PROFILE/`, `ledger.jsonl`.
+- `DATA/`, `OUTPUT/`, `AI_EXPORT/`, `PROFILE/`, `ledger.jsonl`.
 - Browser cookies/tokens/session profiles.
 - Institution/vendor-specific private URLs or credentials.
 
