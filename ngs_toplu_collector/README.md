@@ -17,7 +17,7 @@ A local Python desktop application for NGS run collection, mutation review, tech
 - Technical reruns remain separate while a case-family link supports comparison.
 - Local patient/block metadata with physician autocomplete.
 - OncoKB and Franklin browser links.
-- POOL-level **AI / Reporting package** export: shared-variant spread signals, patient metadata, TMB/MSI/HRD, Oncogenic/Likely Oncogenic calls, QC General Stats and optional full MultiQC JSON.
+- POOL-level **AI / Reporting package** export with explicit DNA/RNA scope, TMB/MSI/HRD, MultiQC TSV/CSV/JSON parsing, structured CNV, enriched SNV annotations, all-call technical fingerprinting and optional raw source attachments.
 
 ## Install
 
@@ -40,18 +40,22 @@ If a run/sample is not complete, collection waits and can be retried after a lat
 
 ## AI / Reporting package
 
-The **YZ / Raporlama** tab can generate one local bundle for a selected POOL group (DNA + RNA when present). The bundle contains:
+The **YZ / Raporlama** tab generates one local bundle for a selected POOL group and an explicit scope: **DNA** (default), RNA, or DNA+RNA. DNA-only requests do not include the matching RNA run.
 
-- POOL run states and shared exact-variant signals.
-- High-to-low and multi-variant sample-to-sample spread signals for technical review.
-- Patient/case diagnosis, age at diagnosis, block and tumor percentage.
-- TMB, MSI, HRD and available QC metrics.
-- All indexed **Oncogenic** and **Likely Oncogenic** calls, including non-PASS calls.
-- Clinical collection summary and raw Clinical JSON when available.
-- Optional full exported MultiQC JSON.
-- A ready-to-paste Markdown prompt plus compact/full JSON files.
+The bundle contains:
 
-Direct identifiers (name and national ID) are **off by default**. Generated AI bundles are patient/NGS data and must never be committed to the public repository. The spread flags are review signals, not an automatic contamination diagnosis or a final clinical interpretation.
+- POOL run states and Oncogenic/Likely Oncogenic exact shared/high→low/multi-variant signals.
+- A second **all-SNV/indel technical fingerprint** that intentionally includes benign, unknown and non-PASS calls to expose cross-sample density, high→low carry-over patterns and recurrent platform artifacts. This is not BAM read-level identity testing.
+- Patient/case diagnosis, age at diagnosis, sex, block and tumor percentage, with missing-context warnings instead of invented values.
+- TMB, MSI and HRD captured from rendered Runs sample rows. A later Runs scan can backfill these fields into existing records.
+- MultiQC **TSV/CSV/JSON Data exports**, including General Stats, VerifyBAMID/FREEMIX-compatible contamination field, Picard duplication and other exported tables. Full mode embeds parsed tables, not merely the QC ZIP filename.
+- All indexed **Oncogenic** and **Likely Oncogenic** calls, including non-PASS calls, enriched from the raw SNV table with transcript/cDNA/protein, CancerVar, ClinVar, COSMIC and available levels.
+- Structured CNV output with gene/event/fold change/probe/level fields when present, while true no-data/missing states stay explicit.
+- Clinical summary/raw JSON and RNA/Fusion data when the selected scope requires them.
+- `SOURCE_INVENTORY.json` plus optional `SOURCE_FILES/` attachments containing the actual Clinical/SNV/CNV/QC/Fusion exports for AI-side verification.
+- `POOL_AI_PROMPT.md`, compact/full JSON and a SHA256 manifest with package-completeness status.
+
+Direct identifiers (name and national ID) are **off by default**. Generated AI bundles are patient/NGS data and must never be committed to the public repository. Shared/high→low/fingerprint flags are review signals, not an automatic contamination diagnosis or a final clinical interpretation.
 
 ## Data safety
 
@@ -73,4 +77,4 @@ Read **[PROJECT_STATE.md](PROJECT_STATE.md)** and **[RECOVERY.md](RECOVERY.md)**
 
 ## Current version
 
-Public source: **v0.2.5**.
+Public source: **v0.2.6**.
