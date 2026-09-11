@@ -1,0 +1,46 @@
+# Private configuration / institution-specific endpoints
+config.local.json
+config.json
+.env
+
+# Patient / specimen / run data - NEVER commit
+DATA/
+OUTPUT/
+PROFILE/
+DIAGNOSTICS/*
+!DIAGNOSTICS/.gitkeep
+ledger.jsonl
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+
+# Large or potentially identifying exports
+*.tsv
+*.csv
+*.vcf
+*.vcf.gz
+*.bam
+*.bai
+*.cram
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.zip
+*.rar
+*.7z
+*.html
+*.mhtml
+*.png
+*.jpg
+*.jpeg
+
+# Python / editor
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.vscode/
