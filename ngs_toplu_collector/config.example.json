@@ -41,7 +41,10 @@
   "spread_ratio_min": 4.0,
   "spread_pair_min_variants": 2,
   "franklin_reference": "auto",
-  "ui_version": "0.2.4",
+  "ui_version": "0.2.5",
   "qc_about_blank_grace_sec": 5,
-  "base_url": "https://YOUR_ANALYSIS_PLATFORM"
+  "base_url": "https://YOUR_ANALYSIS_PLATFORM",
+  "ai_export_dir": "AI_EXPORT",
+  "ai_include_pii_default": false,
+  "ai_full_qc_default": true
 }
