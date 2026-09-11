@@ -6,6 +6,7 @@ config.json
 # Patient / specimen / run data - NEVER commit
 DATA/
 OUTPUT/
+AI_EXPORT/
 PROFILE/
 DIAGNOSTICS/*
 !DIAGNOSTICS/.gitkeep
