@@ -17,6 +17,7 @@ A local Python desktop application for NGS run collection, mutation review, tech
 - Technical reruns remain separate while a case-family link supports comparison.
 - Local patient/block metadata with physician autocomplete.
 - OncoKB and Franklin browser links.
+- POOL-level **AI / Reporting package** export: shared-variant spread signals, patient metadata, TMB/MSI/HRD, Oncogenic/Likely Oncogenic calls, QC General Stats and optional full MultiQC JSON.
 
 ## Install
 
@@ -37,12 +38,28 @@ You may alternatively set `NGS_PLATFORM_BASE_URL` and `NGS_PLATFORM_RUNS_URL` en
 
 If a run/sample is not complete, collection waits and can be retried after a later Runs scan. QC pages that are temporarily blank/unavailable are treated as waiting when upstream processing is incomplete.
 
+## AI / Reporting package
+
+The **YZ / Raporlama** tab can generate one local bundle for a selected POOL group (DNA + RNA when present). The bundle contains:
+
+- POOL run states and shared exact-variant signals.
+- High-to-low and multi-variant sample-to-sample spread signals for technical review.
+- Patient/case diagnosis, age at diagnosis, block and tumor percentage.
+- TMB, MSI, HRD and available QC metrics.
+- All indexed **Oncogenic** and **Likely Oncogenic** calls, including non-PASS calls.
+- Clinical collection summary and raw Clinical JSON when available.
+- Optional full exported MultiQC JSON.
+- A ready-to-paste Markdown prompt plus compact/full JSON files.
+
+Direct identifiers (name and national ID) are **off by default**. Generated AI bundles are patient/NGS data and must never be committed to the public repository. The spread flags are review signals, not an automatic contamination diagnosis or a final clinical interpretation.
+
 ## Data safety
 
 The following are local-only and git-ignored:
 
 - `DATA/` — SQLite state/index and patient metadata
 - `OUTPUT/` — downloaded analysis data
+- `AI_EXPORT/` — generated patient-level AI/reporting bundles
 - `PROFILE/` — Chromium cookies/session
 - `DIAGNOSTICS/` — error snapshots (empty is healthy)
 - `ledger.jsonl`
@@ -56,4 +73,4 @@ Read **[PROJECT_STATE.md](PROJECT_STATE.md)** and **[RECOVERY.md](RECOVERY.md)**
 
 ## Current version
 
-Public source: **v0.2.4**.
+Public source: **v0.2.5**.
