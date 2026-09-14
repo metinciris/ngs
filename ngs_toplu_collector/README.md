@@ -1,80 +1,79 @@
-# NGS Mutasyon Havuzu
+# NGS Mutasyon Havuzu — v0.4.1
 
-A local Python desktop application for NGS run collection, mutation review, technical rerun comparison and POOL-level variant spread analysis.
+Yerel NGS veri toplama, mutasyon/POOL teknik inceleme, YZ raporlama desteği, IGV kuyruğu, hasta/rapor arşivi ve araştırma çalışma alanı.
 
-> Public-source edition: institution/vendor-specific endpoints, credentials, patient data and sequencing exports are intentionally excluded.
+> Public-source edition: kurum/vendor adresleri, kimlik bilgileri, hasta verileri, tarayıcı profili ve sekans çıktıları repoya dahil edilmez.
 
-## Features
+## v0.4.1 — hasta kimliği / çoklu tümör modeli
 
-- Playwright-based browser collection with a persistent local Chromium profile.
-- Runs discovery and DNA/RNA POOL grouping.
-- Upstream readiness awareness: incomplete runs stay **WAITING** instead of being misclassified as collector failures.
-- Clinical/SNV/CNV/Fusion/QC collection when available.
-- Full SNV retention, including filtered/low-VAF calls, for artifact/contamination review.
-- Mutation viewer and archive-wide mutation search.
-- Oncogenic / Likely Oncogenic filtering.
-- POOL spread and sample-to-sample shared-variant analysis.
-- Technical reruns remain separate while a case-family link supports comparison.
-- Local patient/block metadata with physician autocomplete.
-- OncoKB and Franklin browser links.
-- POOL-level **AI / Reporting package** export with explicit DNA/RNA scope, TMB/MSI/HRD, MultiQC TSV/CSV/JSON parsing, structured CNV, enriched SNV annotations, all-call technical fingerprinting and optional raw source attachments.
+- Geçerli TC Kimlik No girildiğinde sistem **yalnız yerel SQLite arşivinde** aynı TC'yi arar.
+- Eşleşme varsa **ad-soyad, doğum tarihi ve cinsiyet** hasta düzeyinde otomatik doldurulur; kullanıcı daha sonra manuel düzeltebilir.
+- TC geçerli olsa bile sistem dış bir nüfus/kimlik servisine bağlanmaz; kontrol yalnız format/checksum ve yerel kayıt eşleşmesidir.
+- Aynı kişinin **birden fazla tümörü/vakası** olabilir. Tanı, istem/raporlama doktoru ve vaka notu tümör/vaka düzeyinde kalır; başka tümöre otomatik taşınmaz.
+- Her tümör/vaka altında **DNA, RNA, tekrar DNA ve tekrar RNA** teknik örnekleri ayrı kayıt olarak korunur. Rerunlar ve farklı assay'ler birleştirilmez.
+- Blok, tümör yüzdesi ve teknik not teknik örnek düzeyindedir.
+- Hasta/Rapor arşivi aynı TC ile güvenli biçimde bağlanan farklı vakaları tek kişi altında gösterebilir; teknik örnek ve raporlama kararları yine ayrı kalır.
 
-## Install
+## Ana çalışma alanları
 
-Requirements: Python 3.10+ and Windows for the included `.bat` launchers.
+### 1. Toplama / YZ / Raporlama
 
-1. Copy `config.example.json` to `config.local.json`.
-2. Set your private analysis-platform `base_url` and `runs_url` in `config.local.json`.
-3. Run `KURULUM.bat` once.
-4. Run `BASLAT.bat`.
+- Playwright tabanlı kalıcı Chromium profili ve RUNS taraması.
+- DNA/RNA POOL gruplama; tamamlanmamış upstream işler WAITING olarak kalır.
+- Clinical, SNV/ShortINDEL, CNV, Fusion ve QC toplama.
+- Mutation Viewer, manuel `reported / not_reported / artifact` kararları.
+- POOL içinde exact ortak varyant, high→low ve tüm-SNV teknik fingerprint incelemesi.
+- YZ/raporlama paketi: TMB/MSI/HRD, QC/MultiQC tabloları, SNV/CNV/Fusion ve kaynak dosya envanteri.
+- `AI_REVIEW_RETURN.json` geri dönüşü ve kalıcı IGV inceleme kuyruğu.
+- Vaka notuna yapıştırılan final rapor metninden raporlanan varyant adaylarını çıkarma; ham SNV/CNV ile eşleştirme ve **manuel onay** sonrası rapor geçmişine ekleme.
 
-You may alternatively set `NGS_PLATFORM_BASE_URL` and `NGS_PLATFORM_RUNS_URL` environment variables.
+### 2. Hasta Arşivi / Araştırma
 
-## Daily workflow
+- POOL seçmeden tüm hastalar, tümör/vakalar ve teknik çalışmalar.
+- Raporlanan varyant geçmişi, rapor metni sürümleri, artefakt hafızası ve karar çelişkileri.
+- Aynı varyantın hangi hastalarda/MP'lerde/POOL'larda görüldüğünü inceleme.
+- Tanı, gen, protein/cDNA, tarih, yaş, cinsiyet, DNA/RNA, rerun, VAF, DP, PASS ve rapor durumu ile araştırma filtresi.
+- Kaydedilebilir kohortlar ve pseudonymous CSV/manifest araştırma çıktısı.
 
-1. **Tarayıcıyı Aç / Login**
-2. **RUNS'u Tara**
-3. **Son POOL'u Tamamla**
+## Veri güvenliği
 
-If a run/sample is not complete, collection waits and can be retried after a later Runs scan. QC pages that are temporarily blank/unavailable are treated as waiting when upstream processing is incomplete.
+Aşağıdakiler **local-only** ve git-ignored kalmalıdır:
 
-## AI / Reporting package
+- `DATA/` — SQLite, kimlik bağlantı anahtarı ve yedekler
+- `OUTPUT/` — indirilen analiz çıktıları
+- `PROFILE/` — Chromium oturumu/cookies
+- `AI_EXPORT/`, `IGV_SNAPSHOTS/`, `ARCHIVE_EXPORT/`, `RESEARCH_EXPORT/`, `DIAGNOSTICS/`
+- `ledger.jsonl`, `config.local.json`
 
-The **YZ / Raporlama** tab generates one local bundle for a selected POOL group and an explicit scope: **DNA** (default), RNA, or DNA+RNA. DNA-only requests do not include the matching RNA run.
+TC YZ paketine veya araştırma dışa aktarımına yazılmaz. Hasta/doktor adları YZ paketinde maskelenir. Genomik/klinik pseudonymous veri yine hassas sağlık verisidir.
 
-The bundle contains:
+## Kurulum / güncelleme
 
-- POOL run states and Oncogenic/Likely Oncogenic exact shared/high→low/multi-variant signals.
-- A second **all-SNV/indel technical fingerprint** that intentionally includes benign, unknown and non-PASS calls to expose cross-sample density, high→low carry-over patterns and recurrent platform artifacts. This is not BAM read-level identity testing.
-- Patient/case diagnosis, age at diagnosis, sex, block and tumor percentage, with missing-context warnings instead of invented values.
-- TMB, MSI and HRD captured from rendered Runs sample rows. A later Runs scan can backfill these fields into existing records.
-- MultiQC **TSV/CSV/JSON Data exports**, including General Stats, VerifyBAMID/FREEMIX-compatible contamination field, Picard duplication and other exported tables. Full mode embeds parsed tables, not merely the QC ZIP filename.
-- All indexed **Oncogenic** and **Likely Oncogenic** calls, including non-PASS calls, enriched from the raw SNV table with transcript/cDNA/protein, CancerVar, ClinVar, COSMIC and available levels.
-- Structured CNV output with gene/event/fold change/probe/level fields when present, while true no-data/missing states stay explicit.
-- Clinical summary/raw JSON and RNA/Fusion data when the selected scope requires them.
-- `SOURCE_INVENTORY.json` plus optional `SOURCE_FILES/` attachments containing the actual Clinical/SNV/CNV/QC/Fusion exports for AI-side verification.
-- `POOL_AI_PROMPT.md`, compact/full JSON and a SHA256 manifest with package-completeness status.
+Windows + Python 3.10+.
 
-Direct identifiers (name and national ID) are **off by default**. Generated AI bundles are patient/NGS data and must never be committed to the public repository. Shared/high→low/fingerprint flags are review signals, not an automatic contamination diagnosis or a final clinical interpretation.
+Yeni kurulumda `config.example.json` → `config.local.json`; özel `base_url` / `runs_url` yalnız yerel dosyada tutulur. Ardından `KURULUM.bat`, sonra `BASLAT.bat`.
 
-## Data safety
+Mevcut kurulumda uygulamayı kapatın, klasörünüzü yedekleyin ve v0.4.1 ZIP içindeki `ngs_toplu_collector` içeriğini mevcut klasörün üzerine çıkarın. `DATA/OUTPUT/PROFILE` kaynak ZIP'e dahil değildir ve silinmemelidir.
 
-The following are local-only and git-ignored:
+## GitHub'daki exact v0.4.1 kaynak
 
-- `DATA/` — SQLite state/index and patient metadata
-- `OUTPUT/` — downloaded analysis data
-- `AI_EXPORT/` — generated patient-level AI/reporting bundles
-- `PROFILE/` — Chromium cookies/session
-- `DIAGNOSTICS/` — error snapshots (empty is healthy)
-- `ledger.jsonl`
-- `config.local.json`
+Bu repodaki **otoritatif v0.4.1 kaynak kopyası** şu klasördedir:
 
-Do not publish patient identifiers, real run/sample UUIDs, raw sequencing outputs or browser profiles.
+`ngs_toplu_collector/source_snapshot/v0.4.1/`
 
-## Continue after losing the local project/chat
+`RESTORE_SOURCE.bat` çalıştırıldığında Base64 parçaları birleştirilir ve exact source-only ZIP oluşturulur. Script SHA256 doğrular:
 
-Read **[PROJECT_STATE.md](PROJECT_STATE.md)** and **[RECOVERY.md](RECOVERY.md)**. They are deliberately maintained so development can resume from GitHub without relying on a specific chat history.
+`7940602b695ba6e4136acb080b7a067e4f1ab6bdffff0b8a0e6fcbed5d8fe071`
 
-## Current version
+Kök dizindeki okunabilir eski `.py` dosyalarının tamamı doğrudan v0.4.1'e senkronize edilene kadar **v0.4.1 için snapshot esas alınmalıdır**. Kök `source_snapshot_restore.bat` en güncel snapshot restore işlemini başlatır.
 
-Public source: **v0.2.6**.
+## Test
+
+v0.4.1 source ZIP üzerinde:
+
+- `python self_test.py`
+- `python -m unittest test_archive test_patient_identity -v`
+
+sentetik verilerle çalıştırıldı. Hasta TC lookup / manuel düzeltme, çoklu tümör, DNA/RNA/rerun ayrımı, arşiv ve araştırma regresyonları test edildi.
+
+Raporlama, artefakt ve kontaminasyon işaretleri karar destek bilgisidir; nihai klinik değerlendirme değildir. Eksik kayıt “negatif” kabul edilmez.
