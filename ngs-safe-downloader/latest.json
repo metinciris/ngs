@@ -1,16 +1,20 @@
 {
-  "version": "2.5",
-  "app_sha256": "4aa96f6f4824f6a8d381a54d3ff61d823c6484f38e072d1311764eda1ee026c4",
-  "package_sha256": "18e43d8c199d98573ac8d2d48219f1b57ce54330a9f2042a17bd49b81a4072aa",
+  "version": "2.6",
+  "app_sha256": "402c89d8462bfbe48571a2e48b2fc9a79dd6da7950d9c3d1d6320268e8a94963",
+  "package_sha256": "4778922ed4c12dffb4cdd97699fcdf543a88f5b2e67045f265075555db4c282b",
   "parts": [
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_00.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_01.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_02.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_03.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_04.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_05.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_06.b64?rev=20260923v25",
-    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.5/pkg_part_07.b64?rev=20260923v25"
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_part_00.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_part_01.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_part_02.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_part_03.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_part_04.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_00.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_01.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_02.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_03.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_04.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_05.b64?rev=20260923v26",
+    "https://raw.githubusercontent.com/metinciris/ngs/main/ngs-safe-downloader/package/v2.6/pkg_tail_06.b64?rev=20260923v26"
   ],
-  "notes": "v2.5: GNU-style checksum sidecar ve absolute-path eslestirme; sidecar, MD5/SHA ve CRC sayaclarini ayri gosterme; nihai dogrulama durumu guclendirildi."
+  "notes": "v2.6: final dogrulama raporlari program klasorundeki NGS_Dogrulamalar arsivine tasinir; dogrulama sonunda HDD gecici calisma alanlari guvenli sekilde temizlenir."
 }
