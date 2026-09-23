@@ -11,11 +11,11 @@ Windows üzerinde büyük NGS ham verilerini kesintiye dayanıklı ve doğrulana
 - Eksik, boyutu hatalı, checksum uyuşmazlığı olan veya FASTQ.GZ bütünlük kontrolünden geçmeyen dosyaları otomatik yeniden indirir.
 - İndirme tamamlanması ile final doğrulama birbirinden ayrı tutulur.
 
-## v2.5 doğrulama
+## Doğrulama
 
-v2.5, GNU `md5sum` biçimindeki checksum yan dosyalarını daha güvenli eşleştirir. Yan dosyada uzak sistemden kalmış mutlak Linux yolu bulunsa bile, `sample.fq.gz.md5sum` dosyası güvenli biçimde ilgili `sample.fq.gz` ile eşleştirilebilir.
+GNU `.md5sum` biçimindeki checksum yan dosyaları desteklenir. Yan dosyada uzak sistemden kalmış mutlak Linux yolu bulunsa bile, `sample.fq.gz.md5sum` güvenli biçimde ilgili yerel `sample.fq.gz` ile eşleştirilebilir.
 
-Doğrulama ekranı ve raporlar artık şu aşamaları ayrı gösterir:
+Doğrulama ekranı ve raporlar şu aşamaları ayrı gösterir:
 
 - checksum yan dosyası bulundu
 - yan dosya okundu ve doğru FASTQ ile eşleştirildi
@@ -27,6 +27,29 @@ Doğrulama ekranı ve raporlar artık şu aşamaları ayrı gösterir:
 `sidecar 16/16 • MD5/SHA 16/16 • CRC 16/16 • TAM DOĞRULANDI`
 
 Yeşil başarı yalnız final doğrulama gerçekten tamamlandığında gösterilir. `NGS_DOWNLOAD_STATUS.json`, indirme sonunda önce `download_complete_pending_verification`; doğrulama sonunda ise `verified`, `verification_warning` veya `verification_failed` olarak güncellenir.
+
+## v2.6: temiz HDD ve doğrulama arşivi
+
+Aktif iş sırasında kesinti güvenliği için yarım indirmeler ve çalışma kayıtları hedef veri diski üzerinde tutulur. Final doğrulama tamamlandığında doğrulama raporları uygulamanın bulunduğu klasördeki `NGS_Dogrulamalar` arşivine taşınır.
+
+Örnek:
+
+```text
+NGS Safe Downloader/
+  NGS_Safe_Downloader.py
+  NGS_Dogrulamalar/
+    QC FASTQ_<is_kimligi>_<tarih_saat>/
+      DOGRULAMA_SONUCU.txt
+      DOGRULAMA_DETAY.csv
+      NGS_DOWNLOAD.log
+      NGS_DOWNLOAD_MANIFEST.csv
+      NGS_DOWNLOAD_STATUS.json
+      SON_DURUM.txt
+```
+
+Final doğrulama sonrasında ilgili HDD çalışma klasörü temizlenir. Veri tam doğrulanmışsa artık gerekli olmayan ilgili `_NGS_PARCA` alanı da kaldırılır; üst klasörler boşsa silinir. Böylece hedef HDD'de mümkün olduğunca yalnız gerçek NGS verileri kalır.
+
+Arayüzdeki **Doğrulama arşivini aç** düğmesi seçili işin en son doğrulama arşivini açar.
 
 ## Ana ekran
 
@@ -46,12 +69,13 @@ Ayrıntılar gerektiğinde `Dosya görünümü`, `Hatalar / yeniden indirme`, `C
 
 ## Disk düzeni
 
-Programın bulunduğu diskin şişmemesi özellikle gözetilir.
+İşlem sürerken:
 
-- Hedef veri klasörü: yalnız gerçek indirilen dosyalar
-- Hedef harici diskte `_NGS_PARCA`: yarım indirmeler
-- Hedef harici diskte `_NGS_WORK`: log, manifest, doğrulama ve karşılaştırma raporları
-- Program/sistem tarafında yalnız uygulama, başlatıcı ve çok küçük ayar/son iş bilgileri
+- Hedef veri klasörü: gerçek indirilen dosyalar
+- Hedef veri diski `_NGS_PARCA`: yarım indirmeler ve devam bilgisi
+- Hedef veri diski `_NGS_WORK`: aktif iş log/manifest/doğrulama kayıtları
+
+Final doğrulama sonrasında rapor arşivi program klasöründeki `NGS_Dogrulamalar` altına alınır ve ilgili geçici HDD çalışma alanları yukarıdaki güvenlik kurallarına göre temizlenir.
 
 ## İki klasörü karşılaştır
 
@@ -67,6 +91,6 @@ Ağ üzerinden indirilen veri ile fiziksel HDD/SSD üzerinde gelen kopya göreli
 
 ## Güncel sürüm
 
-**v2.5**
+**v2.6**
 
 Bu depoda herhangi bir kurum/şirkete ait gerçek veya örnek NGS paylaşım bağlantısı tutulmaz.
