@@ -75,7 +75,7 @@ v0.4.33 UYUMLULUĞU
 KURULUM
 -------
 1. NGS Mutasyon Havuzu'nu tamamen kapatın.
-2. ZIP'i ngs_toplu_collector klasörünün BİR ÜSTÜNE çıkarın.
+2. Bu klasörü veya release paketini ngs_toplu_collector klasörünün BİR ÜSTÜNE çıkarın.
 3. UYGULA_HOTFIX_v0.4.34.bat çalıştırın.
 4. Programı yeniden açın.
 5. YZ Dönüş / IGV bölümünde "Tüm Web IGV Verisini Topla" ile deneyin.
