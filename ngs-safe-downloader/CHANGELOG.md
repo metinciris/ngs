@@ -1,5 +1,14 @@
 # NGS Safe Downloader
 
+## v2.6 - 2026-09-23
+- Final doğrulama raporları artık uygulamanın bulunduğu klasördeki `NGS_Dogrulamalar` arşivine taşınır.
+- Aktif iş sırasında kesinti/yeniden başlatma güvenliği için `_NGS_WORK` ve `_NGS_PARCA` hedef veri diski üzerinde tutulmaya devam eder.
+- Final doğrulama tamamlandıktan sonra ilgili HDD `_NGS_WORK` iş klasörü otomatik temizlenir.
+- Veri tam doğrulanmışsa artık gerekli olmayan ilgili `_NGS_PARCA` iş klasörü de otomatik temizlenir; boş üst geçici klasörler kaldırılır.
+- Hedef veri klasörünün ve HDD'nin mümkün olduğunca yalnız gerçek NGS verileriyle kalması amaçlanır.
+- Arayüzde doğrulama raporlarına erişim `Doğrulama arşivini aç` üzerinden program klasöründeki en son arşive yönlendirilir.
+- v2.5 checksum/MD5/SHA/GZIP-CRC doğrulama mantığı korunur.
+
 ## v2.5 - 2026-09-23
 - GNU `.md5sum` biçimi ve uzak sistemden kalmış mutlak Linux yolları güvenli biçimde destekleniyor.
 - `sample.fq.gz.md5sum` yan dosyası, içerikte yabancı bir mutlak yol bulunsa bile ilgili yerel `sample.fq.gz` ile güvenli biçimde eşleştiriliyor.
