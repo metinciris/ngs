@@ -1,0 +1,56 @@
+--- a/ngs_toplu_collector/metadata_editor.py
++++ b/ngs_toplu_collector/metadata_editor.py
+@@ -253,7 +253,7 @@
+         ttk.Entry(docrow,textvariable=self.enlil_vars['istem_doktor'],state='readonly').grid(row=0,column=0,sticky='ew')
+         ttk.Button(docrow,text='Ana İstem Doktoruna Kullan',command=self.use_enlil_requesting_physician).grid(row=0,column=1,padx=(6,0))
+         ttk.Label(enlil,textvariable=self.enlil_vars['last_lookup'],foreground='#667085').grid(row=6,column=0,columnspan=4,sticky='w',pady=(3,0))
+-        ttk.Label(enlil,text='Tek seferde yalnız bir Enlil sorgusu çalışır; sonuç gelene kadar aynı hasta ekranda kalır. Ad Soyad + geçerli TC + Doğum Tarihi otomatik ortak kayda yazılır. İstem No/Dosya No/İstem tarihi/İlk kabul/Enlil doktor alanları yalnız saklanır; rapora otomatik girmez.',foreground='#667085',wraplength=1000).grid(row=7,column=0,columnspan=4,sticky='w',pady=(3,0))
++        ttk.Label(enlil,text="Tek seferde yalnız bir Enlil sorgusu çalışır; sonuç gelene kadar aynı hasta ekranda kalır. Ad Soyad + geçerli TC + Doğum Tarihi ve Enlil'de açıkça okunabiliyorsa Cinsiyet otomatik ortak kayda yazılır. Manuel Cinsiyet değeri varsa Enlil onu değiştirmez. Yaş doğum tarihinden Enlil istem tarihine göre hesaplanır; istem tarihi yoksa ilk NGS tarihi kullanılır. İstem No/Dosya No/İstem tarihi/İlk kabul/Enlil doktor alanları yalnız saklanır; rapora otomatik girmez.",foreground='#667085',wraplength=1000).grid(row=7,column=0,columnspan=4,sticky='w',pady=(3,0))
+ 
+         case=ttk.LabelFrame(content,text='Hasta / tümör-vaka bilgileri  ·  TC aynı hastayı bağlar; tümörler ayrı kalır',padding=14)
+         case.pack(fill='both',expand=True,pady=(0,10))
+@@ -331,7 +331,7 @@
+         ttk.Button(foot,text='Değişiklikleri Geri Al',command=lambda:self.load(force=True)).grid(row=0,column=1,sticky='w',padx=7)
+         ttk.Label(foot,textvariable=self.save_status,foreground='#8a5a00').grid(row=0,column=2,sticky='e',padx=6)
+         foot.columnconfigure(2,weight=1)
+-        ttk.Label(foot,text='Geçerli TC mevcutsa ad-soyad, doğum tarihi ve cinsiyet otomatik gelir; tanı/not/blok tümör-vaka bazında ayrı kalır.',foreground='#666').grid(row=1,column=0,columnspan=3,sticky='w',pady=(4,0))
++        ttk.Label(foot,text='Geçerli TC mevcutsa ad-soyad, doğum tarihi ve cinsiyet otomatik gelir. Enlil sorgusu boş Cinsiyet alanını da doldurabilir; manuel seçim önceliklidir. Yaş doğum tarihinden vaka tarihine göre türetilir; tanı/not/blok tümör-vaka bazında ayrı kalır.',foreground='#666').grid(row=1,column=0,columnspan=3,sticky='w',pady=(4,0))
+ 
+         # Put the sash near 36% on first render; user can resize it.
+         self._initial_sash_done=False
+@@ -473,7 +473,7 @@
+     def _update_age_label(self):
+         family=self._current_family()
+         dob=self.vars['birth_date'].get().strip()
+-        ref=self.db.case_reference_date(family) if family else ''
++        ref=self.db.case_age_reference_date(family) if family and hasattr(self.db,'case_age_reference_date') else (self.db.case_reference_date(family) if family else '')
+         age=self.db.age_from_birth_date(dob,ref) if dob and ref else None
+         if age is not None:
+             try:ref_display=dt.datetime.fromisoformat(ref).strftime('%d.%m.%Y')
+@@ -717,7 +717,7 @@
+         if not messagebox.askyesno('Enlil kimlik uyuşmazlığı',f'Bu Enlil kimliği seçili protokole zorla uygulansın mı?\n\n{query}\n{detail}\n\nBu işlem yerel ad/TC/doğum tarihini değiştirebilir.',parent=self):return
+         cm=self.db.apply_enlil_lookup(family,query,primary);self._enlil_conflicts.pop(family,None)
+         self._loading=True
+-        self.vars['full_name'].set(cm.get('full_name') or '');self.vars['national_id'].set(cm.get('national_id') or '');self.vars['birth_date'].set(cm.get('birth_date') or '')
++        self.vars['full_name'].set(cm.get('full_name') or '');self.vars['national_id'].set(cm.get('national_id') or '');self.vars['birth_date'].set(cm.get('birth_date') or '');self.vars['sex'].set(cm.get('sex') or '')
+         self._set_enlil_aux(cm);self._loading=False
+         self._on_tc_change();self._update_age_label();self._update_related_label();self._loaded_state=self._form_state()
+         if self.on_change:self.on_change()
+@@ -756,7 +756,7 @@
+         cm=self.db.apply_enlil_lookup(family,query,primary)
+         if current_family==family:
+             self._loading=True
+-            self.vars['full_name'].set(cm.get('full_name') or '');self.vars['national_id'].set(cm.get('national_id') or '');self.vars['birth_date'].set(cm.get('birth_date') or '')
++            self.vars['full_name'].set(cm.get('full_name') or '');self.vars['national_id'].set(cm.get('national_id') or '');self.vars['birth_date'].set(cm.get('birth_date') or '');self.vars['sex'].set(cm.get('sex') or '')
+             self._set_enlil_aux(cm);self._loading=False
+             self._on_tc_change();self._update_age_label();self._update_related_label()
+             if not was_dirty:self._loaded_state=self._form_state()
+@@ -959,7 +959,7 @@
+             messagebox.showerror('Doktor seçimi','İstem doktoru ile raporlama doktoru aynı kişi olamaz.')
+             return False
+         cm_old=self.db.get_case_metadata(family)
+-        ref=self.db.case_reference_date(family)
++        ref=self.db.case_age_reference_date(family) if hasattr(self.db,'case_age_reference_date') else self.db.case_reference_date(family)
+         derived_age=self.db.age_from_birth_date(dob,ref) if dob else None
+         age=str(derived_age) if derived_age is not None else (cm_old.get('age') or '')
+         try:
