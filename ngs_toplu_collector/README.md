@@ -46,7 +46,7 @@ The bundle contains:
 
 - POOL run states and Oncogenic/Likely Oncogenic exact shared/high→low/multi-variant signals.
 - A second **all-SNV/indel technical fingerprint** that intentionally includes benign, unknown and non-PASS calls to expose cross-sample density, high→low carry-over patterns and recurrent platform artifacts. This is not BAM read-level identity testing.
-- Patient/case diagnosis, age at diagnosis, sex, block and tumor percentage, with missing-context warnings instead of invented values.
+- Patient/case diagnosis, age at diagnosis, sex, block and tumor percentage, with missing-context warnings instead of invented values. Sex is taken first from **Hasta / Blok / Ortak Bilgiler > Cinsiyet**. ENLIL may fill it only when that local field is empty and an explicit selected sex can be read. Age is derived from local DOB using ENLIL request/accept date when available, otherwise first NGS date; DOB itself is not exported.
 - TMB, MSI and HRD captured from rendered Runs sample rows. A later Runs scan can backfill these fields into existing records.
 - MultiQC **TSV/CSV/JSON Data exports**, including General Stats, VerifyBAMID/FREEMIX-compatible contamination field, Picard duplication and other exported tables. Full mode embeds parsed tables, not merely the QC ZIP filename.
 - All indexed **Oncogenic** and **Likely Oncogenic** calls, including non-PASS calls, enriched from the raw SNV table with transcript/cDNA/protein, CancerVar, ClinVar, COSMIC and available levels.
@@ -77,4 +77,9 @@ Read **[PROJECT_STATE.md](PROJECT_STATE.md)** and **[RECOVERY.md](RECOVERY.md)**
 
 ## Current version
 
-Public source: **v0.2.6**.
+Latest validated local/hotfix line: **v0.4.42**.
+
+
+## v0.4.42 note
+
+The current validated hotfix source patches are under `hotfixes/v0.4.42/`. They preserve the public/private boundary: no patient bundle, local database, browser profile, TC, full name or sequencing export is committed.
