@@ -1,7 +1,7 @@
 # PROJECT STATE — NGS Mutasyon Havuzu
 
-**Public source version:** 0.2.5  
-**Status:** collector + archive + mutation viewer + POOL spread analysis + local AI/reporting package export are operational.
+**Latest validated local/hotfix version:** 0.4.42  
+**Status:** collector + archive + mutation viewer + POOL spread analysis + local AI/reporting package export are operational. v0.4.42 makes the local Hasta/Blok sex field authoritative for AI context, allows safe ENLIL sex autofill only when blank, and derives age from DOB using the pathology request date when available.
 
 This file is intentionally maintained as a restart point. If the local project directory or the development chat is lost, start here.
 
@@ -83,8 +83,9 @@ Case-family level:
 
 - Full name
 - National ID
-- Age at diagnosis (fixed, not recalculated with calendar years)
-- Sex
+- Birth date (local-only; never exported in the AI clinical context)
+- Age at diagnosis/reporting context, derived from birth date using ENLIL request/accept date when available, otherwise first NGS date
+- Sex — authoritative source is `Hasta / Blok / Ortak Bilgiler > Cinsiyet`; ENLIL fills only when empty
 - Tumor diagnosis
 - Requesting physician
 - Reporting physician
@@ -118,3 +119,12 @@ The public repository must never contain:
 - Institution/vendor-specific private URLs or credentials.
 
 The supported platform URL is supplied only through ignored `config.local.json`, legacy local `config.json`, or environment variables.
+
+
+## v0.4.42 clinical-context decisions
+
+- Do not rely on GenNext/Altium for sex when it exposes only selector placeholders.
+- `Hasta / Blok / Ortak Bilgiler > Cinsiyet` is the authoritative local source used by AI export.
+- ENLIL JAB may populate sex only if the local field is empty and a single explicit selected Male/Female value is available; ambiguous controls are ignored.
+- Birth date remains local-only. AI export gets only derived age plus the age reference date.
+- Age reference priority: ENLIL request date → ENLIL first-accept date → first NGS run date; legacy ENLIL age is fallback only.
