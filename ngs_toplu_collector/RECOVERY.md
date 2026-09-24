@@ -32,3 +32,8 @@ Back up these local items separately to an institution-approved encrypted destin
 `PROFILE/` contains browser session material and should normally be recreated by logging in again rather than copied to an untrusted backup.
 
 Never upload a patient-data backup to this public repository.
+
+
+## Current hotfix recovery note
+
+As of v0.4.42, review `hotfixes/v0.4.42/` and `PROJECT_STATE.md` before continuing development. The v0.4.42 patches depend on the validated v0.4.41 local line; they intentionally contain no patient data.
