@@ -1,0 +1,111 @@
+--- a/ngs_toplu_collector/db.py
++++ b/ngs_toplu_collector/db.py
+@@ -879,16 +879,23 @@
+     @staticmethod
+     def age_from_birth_date(birth_date, reference_date):
+         import datetime as _dt
+-        try:
+-            b=_dt.datetime.strptime(str(birth_date or '').strip(),'%d.%m.%Y').date()
+-            rtxt=str(reference_date or '').strip()
+-            if not rtxt: return None
+-            try: r=_dt.datetime.fromisoformat(rtxt).date()
+-            except Exception: r=_dt.datetime.strptime(rtxt[:10],'%Y-%m-%d').date()
+-            if b>r: return None
+-            return r.year-b.year-((r.month,r.day)<(b.month,b.day))
+-        except Exception:
++        def parse_date(value):
++            if isinstance(value,_dt.datetime):return value.date()
++            if isinstance(value,_dt.date):return value
++            text=str(value or '').strip()
++            if not text:return None
++            # ISO timestamps and common ENLIL date/date-time forms.
++            try:return _dt.datetime.fromisoformat(text.replace('Z','+00:00')).date()
++            except Exception:pass
++            first=text.split()[0]
++            for fmt in ('%d.%m.%Y','%d/%m/%Y','%Y-%m-%d','%d-%m-%Y'):
++                try:return _dt.datetime.strptime(first,fmt).date()
++                except Exception:pass
+             return None
++        b=parse_date(birth_date);r=parse_date(reference_date)
++        if not b or not r or b>r:return None
++        age=r.year-b.year-((r.month,r.day)<(b.month,b.day))
++        return age if 0<=age<=120 else None
+ 
+     def case_reference_date(self,case_family):
+         r=self.cx.execute("""SELECT MIN(p.run_date) AS run_date
+@@ -897,6 +904,20 @@
+         """,(case_family or '',)).fetchone()
+         return (r['run_date'] if r and r['run_date'] else '')
+ 
++    def case_age_reference_date(self,case_family):
++        """Best clinical reference date for age-at-diagnosis/reporting context.
++
++        ENLIL pathology request date is preferred because it is closer to the specimen/
++        diagnostic episode.  First NGS run date is the safe fallback for older records.
++        """
++        self.ensure_metadata_schema()
++        r=self.cx.execute('SELECT enlil_request_date,enlil_first_accept_date FROM case_metadata WHERE case_family=?',(case_family or '',)).fetchone()
++        if r:
++            for key in ('enlil_request_date','enlil_first_accept_date'):
++                value=str(r[key] or '').strip()
++                if value:return value
++        return self.case_reference_date(case_family)
++
+     def get_case_metadata(self,case_family):
+         self.ensure_metadata_schema()
+         r=self.cx.execute('SELECT * FROM case_metadata WHERE case_family=?',(case_family or '',)).fetchone()
+@@ -935,7 +956,9 @@
+     def apply_enlil_lookup(self,case_family,query,primary):
+         """Merge authoritative ENLIL demographics plus optional pathology request metadata.
+ 
+-        Name, validated TC and birth date populate the shared patient/case record.
++        Name, validated TC, birth date and (when locally empty) explicit ENLIL sex
++        populate the shared patient/case record.  A manually saved sex in
++        Hasta / Blok / Ortak Bilgiler is authoritative and is never overwritten.
+         Request/file/doctor/acceptance fields are stored separately and are not used in
+         reporting unless the user explicitly copies them into a shared field.
+         """
+@@ -946,7 +969,20 @@
+         tc=''.join(ch for ch in str(primary.get('tc_no') or '') if ch.isdigit())
+         if not self.validate_national_id(tc):tc=str(old.get('national_id') or '').strip()
+         dob=str(primary.get('dogum_tarihi') or '').strip() or old.get('birth_date') or ''
+-        ref=self.case_reference_date(case_family);derived=self.age_from_birth_date(dob,ref) if dob else None
++        incoming_sex=self.normalize_sex(primary.get('cinsiyet') or primary.get('sex') or '')
++        # Hasta / Blok / Ortak Bilgiler remains authoritative. ENLIL only fills sex
++        # when the shared local field is empty.
++        local_sex=self.normalize_sex(old.get('sex') or '')
++        sex=local_sex or (incoming_sex if incoming_sex in ('Erkek','Kadın') else '')
++        ref=(str(primary.get('istem_tarihi') or '').strip() or
++             str(primary.get('ilk_istek_kabul_tarihi') or '').strip() or
++             self.case_reference_date(case_family))
++        derived=self.age_from_birth_date(dob,ref) if dob and ref else None
++        if derived is None:
++            try:
++                raw_age=int(float(str(primary.get('yas') or '').strip().replace(',','.')))
++                derived=raw_age if 0<=raw_age<=120 else None
++            except Exception:derived=None
+         age=str(derived) if derived is not None else (old.get('age') or '')
+         stamp=now()
+         self.cx.execute("""INSERT INTO case_metadata(
+@@ -954,18 +990,18 @@
+           enlil_biopsy_no,enlil_request_no,enlil_file_no,enlil_requesting_physician,enlil_request_date,enlil_first_accept_date,enlil_last_lookup_at,note,updated_at)
+           VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+           ON CONFLICT(case_family) DO UPDATE SET
+-            full_name=excluded.full_name,national_id=excluded.national_id,birth_date=excluded.birth_date,age=excluded.age,
++            full_name=excluded.full_name,national_id=excluded.national_id,birth_date=excluded.birth_date,age=excluded.age,sex=excluded.sex,
+             enlil_biopsy_no=excluded.enlil_biopsy_no,enlil_request_no=excluded.enlil_request_no,enlil_file_no=excluded.enlil_file_no,
+             enlil_requesting_physician=excluded.enlil_requesting_physician,enlil_request_date=excluded.enlil_request_date,enlil_first_accept_date=excluded.enlil_first_accept_date,
+             enlil_last_lookup_at=excluded.enlil_last_lookup_at,updated_at=excluded.updated_at""",(
+-              case_family,name,tc,dob,age,old.get('diagnosis') or '',self.normalize_sex(old.get('sex')),
++              case_family,name,tc,dob,age,old.get('diagnosis') or '',sex,
+               old.get('requesting_physician') or '',old.get('reporting_physician') or '',
+               str(query or primary.get('biyopsi_no') or '').strip(),str(primary.get('istem_no') or '').strip(),
+               str(primary.get('dosya_no') or '').strip(),str(primary.get('istem_doktor') or '').strip(),str(primary.get('istem_tarihi') or '').strip(),
+               str(primary.get('ilk_istek_kabul_tarihi') or '').strip(),stamp,old.get('note') or '',stamp))
+         self.cx.commit()
+         if self.validate_national_id(tc):
+-            self.set_patient_profile(tc,full_name=name,birth_date=dob,sex=old.get('sex') or '',sync_cases=True)
++            self.set_patient_profile(tc,full_name=name,birth_date=dob,sex=sex,sync_cases=True)
+         return self.get_case_metadata(case_family)
+ 
+     def get_patient_profile(self,national_id):
