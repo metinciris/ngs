@@ -1,0 +1,67 @@
+--- a/ngs_toplu_collector/ai_export.py
++++ b/ngs_toplu_collector/ai_export.py
+@@ -642,7 +642,7 @@
+       4) null + missing_context
+     """
+     family = sample.get('case_family') or sample.get('patient_id') or ''
+-    reference_date = db.case_reference_date(family) if hasattr(db, 'case_reference_date') else ''
++    reference_date = (db.case_age_reference_date(family) if hasattr(db, 'case_age_reference_date') else (db.case_reference_date(family) if hasattr(db, 'case_reference_date') else ''))
+     sources = {}
+     gen = _gennext_context_from_clinical(clinical)
+ 
+@@ -654,16 +654,23 @@
+         if diagnosis:
+             sources['diagnosis'] = 'gennext_clinical'
+ 
+-    age = _context_age(case_meta.get('age'))
+-    if age is not None:
+-        sources['age_at_diagnosis'] = 'local_case_metadata'
+-    elif case_meta.get('birth_date') and reference_date and hasattr(db, 'age_from_birth_date'):
++    # Prefer a DOB-derived age over legacy/manual age text.  Birth date itself remains
++    # local-only; only the derived age is exported.  ENLIL request date is preferred by
++    # case_age_reference_date(), with first NGS date as fallback.
++    age = None
++    if case_meta.get('birth_date') and reference_date and hasattr(db, 'age_from_birth_date'):
+         try:
+             age = db.age_from_birth_date(case_meta.get('birth_date'), reference_date)
+         except Exception:
+             age = None
+         if age is not None:
+-            sources['age_at_diagnosis'] = 'local_birth_date_plus_first_ngs_date'
++            has_enlil_ref = bool(str(case_meta.get('enlil_request_date') or case_meta.get('enlil_first_accept_date') or '').strip())
++            sources['age_at_diagnosis'] = ('local_birth_date_plus_enlil_request_date' if has_enlil_ref
++                                           else 'local_birth_date_plus_first_ngs_date')
++    if age is None:
++        age = _context_age(case_meta.get('age'))
++        if age is not None:
++            sources['age_at_diagnosis'] = 'local_case_metadata'
+     if age is None:
+         age = gen.get('age_at_diagnosis')
+         if age is not None:
+@@ -671,7 +678,7 @@
+ 
+     sex = _context_sex(case_meta.get('sex'))
+     if sex:
+-        sources['sex'] = 'local_case_metadata'
++        sources['sex'] = 'local_patient_block_common_info'
+     else:
+         sex = gen.get('sex')
+         if sex:
+@@ -1718,7 +1725,7 @@
+         'run_states': run_states, 'patient_count': len({(p['identity'].get('patient_link_id') or p['identity']['case_family']) for p in patients}), 'technical_sample_count': len(patients),
+         'contains_direct_identifiers': False, 'direct_identifier_fields': [], 'contains_masked_names': bool(include_pii), 'national_id_included': False, 'source_files_in_bundle': bool(include_source_files),
+         'clinical_context_pii_independent': True,
+-        'clinical_context_source_priority': ['local_case_metadata', 'local_sample_metadata', 'gennext_clinical', 'null_with_missing_context'],
++        'clinical_context_source_priority': ['local_patient_block_common_info', 'local_case_metadata', 'local_sample_metadata', 'gennext_clinical', 'null_with_missing_context'],
+         'analysis_scope': {
+             'variants': 'Seçilen örnek türündeki tüm Oncogenic + Likely Oncogenic çağrılar; non-PASS çağrılar teknik POOL yayılım incelemesi için korunur. Kompakt kayıtta CancerVar/ClinVar/COSMIC/transkript gibi mevcut SNV anotasyonları da taşınır.',
+             'qc': 'MultiQC Data ZIP içindeki TSV/CSV/JSON tabloları okunur. General Stats, VerifyBAMID, Picard ve diğer tablolar FULL pakete gömülür; ana metrikler ayrıca normalize edilir.',
+@@ -1726,7 +1733,7 @@
+             'shared_reads': 'Oncogenic/Likely Oncogenic exact varyant sinyallerine ek olarak tüm SNV/indel TSV satırları benign/unknown/non-PASS dahil teknik fingerprint için karşılaştırılır. Bu BAM read-level ortaklık testi değildir.',
+             'biomarkers': 'TMB/MSI/HRD Runs taramasından yakalanan değerlerdir; boş alan negatif/0 kabul edilmez.',
+             'identity_linkage': 'DNA ve RNA farklı MP numarası taşıyabilir. Doğrulanmış yerel TC varsa aynı hasta için stabil, geri döndürülemez HMAC patient_link_id üretilir; TC dışa aktarılmaz. TC yoksa normalize ad-soyad + doğum tarihi + cinsiyet daha düşük güvenli fallback eşleştirmedir.',
+-            'clinical_context': 'MP/protokol, yaş, cinsiyet, tanı, blok, tümör yüzdesi ve DNA/RNA teknik türü doğrudan tanımlayıcı PII sayılmaz ve maskeli-ad seçeneğinden bağımsız taşınır. Alan önceliği yerel vaka/örnek metadata > GenNext Clinical > null + missing_context şeklindedir.',
++            'clinical_context': 'MP/protokol, yaş, cinsiyet, tanı, blok, tümör yüzdesi ve DNA/RNA teknik türü doğrudan tanımlayıcı PII sayılmaz ve maskeli-ad seçeneğinden bağımsız taşınır. Alan önceliği Hasta / Blok / Ortak Bilgiler + yerel teknik metadata > GenNext Clinical > null + missing_context şeklindedir.',
+             'block_id': 'Blok bilgisi mevcutsa teknik record_key bağlamıyla taşınır; yoksa null kalır ve missing_context içinde belirtilir.',
+             'reported_history': 'Vaka notundaki rapor metninden manuel onaylanan ve manuel eklenen raporlanmış varyantlar ayrı geçmiş olarak taşınır; geçmiş kayıt tek başına yeni raporlama kararı değildir.',
+             'artifact_history': 'Patolog tarafından artefakt olarak işaretlenmiş önceki exact varyantlar known_artifact_history içinde verilir. Tekrarlayan POOL varyantları ayrıca all_snv fingerprint içinde gösterilir.',
