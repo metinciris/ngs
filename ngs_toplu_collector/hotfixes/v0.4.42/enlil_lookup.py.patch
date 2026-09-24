@@ -1,0 +1,115 @@
+--- a/ngs_toplu_collector/enlil_lookup.py
++++ b/ngs_toplu_collector/enlil_lookup.py
+@@ -57,6 +57,27 @@
+     return bool(re.fullmatch(r"\d{2}\.\d{2}\.\d{4}",normalize(value)))
+ 
+ 
++def normalize_sex_value(value, allow_initial=False):
++    """Normalize an explicit ENLIL sex value without guessing.
++
++    The pathology result grid does not have a dedicated sex column.  Some ENLIL
++    installations expose patient sex elsewhere in the JAB tree (label/value, selected
++    radio item or combo-box value).  Only explicit male/female values are accepted.
++    """
++    text=normalize(value)
++    if not text:return ''
++    folded=text.casefold().replace('ı','i')
++    compact=re.sub(r'[^a-z0-9çğıöşü]+','',folded)
++    if compact in ('erkek','male','man'):return 'Erkek'
++    if compact in ('kadin','female','woman'):return 'Kadın'
++    if allow_initial and compact in ('e','m'):return 'Erkek'
++    if allow_initial and compact in ('k','f'):return 'Kadın'
++    # Accept labelled forms such as "Cinsiyet: Erkek" / "Sex Female".
++    if re.search(r'\b(erkek|male)\b',folded):return 'Erkek'
++    if re.search(r'\b(kadin|kadın|female)\b',folded):return 'Kadın'
++    return ''
++
++
+ def biopsy_key(value):
+     """Normalize any visible/JAB biopsy label to canonical MP173/26.
+ 
+@@ -227,6 +248,63 @@
+                 stack.extend(reversed(children))
+         return out
+ 
++    def extract_patient_sex(self,tree):
++        """Return explicit patient sex exposed anywhere in the current ENLIL JAB tree.
++
++        Safety rules:
++        - checked/selected Erkek/Kadın controls win;
++        - otherwise a value next to a Cinsiyet/Sex/Gender label may be used;
++        - a whole-tree fallback is accepted only when exactly one explicit sex value is
++          present.  Seeing both unselected radio choices is treated as ambiguous.
++        """
++        nodes=list(tree or [])
++        # 1) Selected control is strongest evidence.
++        for node in nodes:
++            value=normalize_sex_value(self.node_name(node),allow_initial=False)
++            if not value:continue
++            role=self.node_role(node)
++            states=self.node_states(node)
++            if role in ('radio button','check box','combo box','list item') and ('selected' in states or 'checked' in states):
++                return value
++
++        def is_label(text):
++            folded=normalize(text).casefold().replace('ı','i')
++            compact=re.sub(r'[^a-z0-9]+','',folded)
++            return compact in ('cinsiyet','cinsiyeti','sex','gender') or compact.startswith('cinsiyet')
++
++        # 2) Search in the smallest nearby container of a sex label.
++        for label in nodes:
++            if not is_label(self.node_name(label)):continue
++            cur=label
++            for _ in range(3):
++                parent=getattr(cur,'parent',None)
++                if parent is None:break
++                values=[]
++                for raw in self._leaf_names(parent,limit=120):
++                    sx=normalize_sex_value(raw,allow_initial=True)
++                    if sx and sx not in values:values.append(sx)
++                if len(values)==1:return values[0]
++                cur=parent
++
++        # 3) Last-resort exact/unambiguous visible value. Single-letter E/K is not
++        # accepted globally because it is too easy to collide with unrelated controls.
++        values=[]
++        for node in nodes:
++            sx=normalize_sex_value(self.node_name(node),allow_initial=False)
++            if sx and sx not in values:values.append(sx)
++        return values[0] if len(values)==1 else ''
++
++    def _attach_exact_tree_demographics(self,rows,tree,expected_query=''):
++        expected=biopsy_key(expected_query)
++        if not expected:return rows
++        sex=self.extract_patient_sex(tree)
++        if not sex:return rows
++        for row in rows or []:
++            if biopsy_key(row.get('biyopsi_no'))==expected:
++                row['cinsiyet']=sex
++                break
++        return rows
++
+     def _row_from_name_stream(self,raw,expected_query=''):
+         expected=biopsy_key(expected_query)
+         if not expected:return None
+@@ -309,15 +387,17 @@
+         expected=biopsy_key(expected_query)
+         if not candidates:
+             anchored=self._exact_row_from_tree_anchor(tree,expected_query)
+-            return [anchored] if anchored else []
++            rows=[anchored] if anchored else []
++            return self._attach_exact_tree_demographics(rows,tree,expected_query)
+         if expected:
+             exact_tables=[rows for rows in candidates if any(biopsy_key(r.get('biyopsi_no'))==expected for r in rows)]
+             if exact_tables:
+                 # Prefer the smallest exact table: during refresh this is usually the new
+                 # result, while a stale multi-row table can coexist for a short time.
+                 exact_tables.sort(key=lambda rows:(len(rows),-sum(bool(r.get('ad_soyad')) for r in rows)))
+-                return exact_tables[0]
+-        candidates.sort(key=len,reverse=True);return candidates[0]
++                return self._attach_exact_tree_demographics(exact_tables[0],tree,expected_query)
++        candidates.sort(key=len,reverse=True)
++        return self._attach_exact_tree_demographics(candidates[0],tree,expected_query)
+ 
+     def choose_primary_row(self,rows,query):
+         """Return only the exact queried biopsy row; never fall back to stale first row."""
