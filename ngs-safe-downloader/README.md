@@ -81,6 +81,23 @@ Final doğrulama sonrasında rapor arşivi program klasöründeki `NGS_Dogrulama
 
 Ağ üzerinden indirilen veri ile fiziksel HDD/SSD üzerinde gelen kopya göreli yol + boyut + SHA-256 ile salt-okunur biçimde karşılaştırılabilir. Sonuçlar HDD inceleme araçlarına benzer küçük durum kareleriyle gösterilir.
 
+## Opsiyonel Telegram uzaktan indirme
+
+NGS Safe Downloader çekirdeği **v2.6** olarak kalır. Telegram uzaktan kontrolü ayrı bir sidecar entegrasyonudur.
+
+- `/indir` — Nextcloud/Gen Cloud Drive paylaşım bağlantısını alır ve mevcut Safe Downloader akışını başlatır.
+- `/indir_durum` — aktif indirme/doğrulama durumunu canlı durum dosyalarından salt-okunur biçimde gösterir.
+
+Desteklenen paylaşım biçimi:
+
+```text
+https://genclouddrive.com/index.php/s/<share-token>
+```
+
+Gerçek paylaşım tokenları, bot tokenı ve kullanıcı kimlikleri public repoya yazılmaz.
+
+Ayrıntılar: [TELEGRAM_REMOTE.md](TELEGRAM_REMOTE.md)
+
 ## Kurulum / güncelleme
 
 1. Yalnız `BASLAT_NGS_INDIRICI.bat` dosyasını boş bir klasöre indirin.
