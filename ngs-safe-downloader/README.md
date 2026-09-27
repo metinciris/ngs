@@ -96,8 +96,6 @@ https://genclouddrive.com/index.php/s/<share-token>
 
 Gerçek paylaşım tokenları, bot tokenı ve kullanıcı kimlikleri public repoya yazılmaz.
 
-Ayrıntılar: [TELEGRAM_REMOTE.md](TELEGRAM_REMOTE.md)
-
 ## Kurulum / güncelleme
 
 1. Yalnız `BASLAT_NGS_INDIRICI.bat` dosyasını boş bir klasöre indirin.
