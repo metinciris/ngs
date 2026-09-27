@@ -1,5 +1,12 @@
 # NGS Safe Downloader
 
+## Telegram sidecar v0.4.64 - 2026-09-27
+- NGS Safe Downloader çekirdeği v2.6 olarak korunur.
+- `/indir` uzaktan indirme başlatma akışını kullanır.
+- `/indir_durum` aktif indirme/doğrulama durumunu salt-okunur biçimde gösterir.
+- v0.4.64 yardım ve fallback komut metinlerini eşitler.
+- Public depoda gerçek paylaşım bağlantıları veya yerel kimlik bilgileri tutulmaz.
+
 ## v2.6 - 2026-09-23
 - Final doğrulama raporları artık uygulamanın bulunduğu klasördeki `NGS_Dogrulamalar` arşivine taşınır.
 - Aktif iş sırasında kesinti/yeniden başlatma güvenliği için `_NGS_WORK` ve `_NGS_PARCA` hedef veri diski üzerinde tutulmaya devam eder.
