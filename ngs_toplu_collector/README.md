@@ -57,6 +57,10 @@ The bundle contains:
 
 Direct identifiers (name and national ID) are **off by default**. Generated AI bundles are patient/NGS data and must never be committed to the public repository. Shared/high→low/fingerprint flags are review signals, not an automatic contamination diagnosis or a final clinical interpretation.
 
+## Telegram uzaktan kontrolü
+
+Windows agentinin ilk kurulumu, BotFather kimlikleri, mevcut kurulum denetimi ve takılı kilit onarımı için [Telegram botu kurulum ve onarım rehberi](docs/TELEGRAM_KURULUM.md) bölümünü izleyin. Bu açık depo güncel yerel agentin tam dağıtımını içermez; şifreli bot ayarları yerelde kalır.
+
 ## Data safety
 
 The following are local-only and git-ignored:
