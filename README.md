@@ -55,3 +55,9 @@ RNA MultiQC paketlerinde Picard duplikasyon metriği bulunmayabilir. Bu durumda 
 GEREKSİNİM
 ----------
 Python 3.10 veya üzeri. Harici Python paketi gerekmez.
+
+DİĞER ARAÇLAR
+-------------
+- [NGS collector](ngs_toplu_collector/README.md)
+- [NGS Safe Downloader](ngs-safe-downloader/README.md)
+- [Telegram botu kurulum ve onarım rehberi](ngs_toplu_collector/docs/TELEGRAM_KURULUM.md)
