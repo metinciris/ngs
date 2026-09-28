@@ -96,6 +96,8 @@ https://genclouddrive.com/index.php/s/<share-token>
 
 Gerçek paylaşım tokenları, bot tokenı ve kullanıcı kimlikleri public repoya yazılmaz.
 
+Telegram botunun adım adım kurulumu ve yanıt vermeyen agentin onarımı için [NGS Telegram rehberi](../ngs_toplu_collector/docs/TELEGRAM_KURULUM.md) bölümüne bakın. Bot menüsünün görünmesi Windows agentinin çalıştığını göstermez.
+
 ## Kurulum / güncelleme
 
 1. Yalnız `BASLAT_NGS_INDIRICI.bat` dosyasını boş bir klasöre indirin.
