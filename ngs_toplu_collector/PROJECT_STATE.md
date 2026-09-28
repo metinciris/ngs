@@ -1,10 +1,10 @@
 # PROJECT STATE — NGS Mutasyon Havuzu
 
 **Latest validated local/hotfix version:** 0.4.42  
-**Telegram sidecar: 0.4.64 (validated locally; downloader core remains v2.6)**  
+**Telegram sidecar: local v0.4.69 PC shutdown patch and stale-lock repair verified on Windows; downloader core remains v2.6. The current agent source is not fully published here.**  
 **Status:** collector + archive + mutation viewer + POOL spread analysis + local AI/reporting package export are operational. v0.4.42 makes the local Hasta/Blok sex field authoritative for AI context, allows safe ENLIL sex autofill only when blank, and derives age from DOB using the pathology request date when available.
 
-This file is intentionally maintained as a restart point. If the local project directory or the development chat is lost, start here.
+Telegram installation and recovery: [docs/TELEGRAM_KURULUM.md](docs/TELEGRAM_KURULUM.md).\n\nThis file is intentionally maintained as a restart point. If the local project directory or the development chat is lost, start here.
 
 ## Current architecture
 
