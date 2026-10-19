@@ -1,131 +1,48 @@
-# PROJECT STATE — NGS Mutasyon Havuzu
+# PROJECT STATE — NGS Mutasyon Havuzu v0.4.83
 
-**Latest validated local/hotfix version:** 0.4.42  
-**Telegram sidecar: local v0.4.69 PC shutdown patch and stale-lock repair verified on Windows; downloader core remains v2.6. The current agent source is not fully published here.**  
-**Status:** collector + archive + mutation viewer + POOL spread analysis + local AI/reporting package export are operational. v0.4.42 makes the local Hasta/Blok sex field authoritative for AI context, allows safe ENLIL sex autofill only when blank, and derives age from DOB using the pathology request date when available.
+**Latest validated source line:** 0.4.83  
+**Focus:** POOL YZ değerlendirme merkezi, DNA/RNA ayrımı, YZ/Selection/yerel karar ayrıştırması, IGV/QC/önceki rapor bağlamı, ferah sekmeli UI, uzun YZ üretimlerinde sert 10 dakika kesintisinin kaldırılması.
 
-Telegram installation and recovery: [docs/TELEGRAM_KURULUM.md](docs/TELEGRAM_KURULUM.md).\n\nThis file is intentionally maintained as a restart point. If the local project directory or the development chat is lost, start here.
+Bu dosya geliştirmeye yeniden başlama noktasıdır. Tasarım değiştirilmeden önce `docs/ARCHITECTURE_v0483.md`, `docs/AI_DECISION_ENGINE_v0483.md` ve `docs/UI_ADAPTER_CONTRACT_v0483.md` okunmalıdır.
 
-## Current architecture
+## Değişmez mimari sınırlar
 
-- Python desktop UI: Tkinter/ttk.
-- Browser automation: Playwright persistent Chromium profile.
-- Exactly one browser worker thread owns all Playwright objects.
-- Main Runs page stays open; child pages are closed after each task.
-- State/index database: `DATA/collector_state.sqlite3` (local only; never commit).
-- Raw downloads: `OUTPUT/` (local only; never commit).
-- Browser session/cookies: `PROFILE/` (local only; never commit).
-- Diagnostics on automation failures: `DIAGNOSTICS/` (local only; empty is healthy).
-- Immutable-ish file ledger: `ledger.jsonl` (local only).
+- Teknik örnek: `runUuid::sampleUuid::sampleType`.
+- `patient_link_id` hasta düzeyi bağlantıdır; teknik kimliğin yerine geçmez.
+- `variant_key` varyant düzeyi çapraz referanstır.
+- DNA ve RNA ortak hasta çalışma alanında gösterilebilir fakat analitik kuralları ayrıdır.
+- GenNext Selection, YZ önerisi ve patolog/yerel rapor kararı üç ayrı veri alanıdır.
+- YZ hiçbir zaman Selection'ı veya nihai rapor kararını otomatik değiştirmez.
+- Empty RNA Selection analitik negatif değildir.
+- QC/contamination heuristics tek başına kanıtlanmış kontaminasyon etiketi üretmez.
+- Unknown oncogenicity sessizce düşürülmez.
+- IGV bekleyen öneri, IGV sonucu olmadan otomatik rapora terfi etmez.
 
-## Technical sample identity
+## v0.4.83 çalışma alanları
 
-Technical records are keyed by:
+- POOL Özeti
+- Hasta İnceleme
+- DNA / Mutasyon
+- RNA / Füzyon
+- QC / Uyarılar
+- IGV İstekleri
+- IGV Karar / Kanıt
+- YZ Özeti
+- Raporlama
+- Geçmiş / Arşiv
 
-`runUuid :: sampleUuid :: sampleType`
+## YZ dönüş uyumluluğu
 
-Display sample labels are preserved. A rerun convention such as `MP001--26` remains a separate technical record from `MP001-26`, while `case_family` can link them for biological comparison.
+Geçmiş `ngs_ai_review_return_v1` ve `v2` dönüşleri normalize edilerek okunur. Yeni UI ham şemaya doğrudan bağlanmamalıdır.
 
-## Collector flow
+## Uzun YZ üretimi
 
-Daily UI flow:
+Eski 600 saniyelik sert deadline klinik paket tamamlanmak üzereyken yanlış başarısızlık oluşturabiliyordu. v0.4.83'te salt süre aşımı worker'ı başarısız saymaz; gerçek worker hatası/kullanıcı iptali ayrı tutulur.
 
-1. Open browser / login.
-2. Scan Runs.
-3. Complete latest POOL group.
+## Public/private sınırı
 
-A POOL may have separate DNA and RNA runs. The same POOL number is treated as one group, while each run remains technically separate.
+Bu repo kaynak kodu ve sentetik test verisi içindir. Gerçek hasta/örnek/run verisi, AI_EXPORT, DATA, OUTPUT, PROFILE, DIAGNOSTICS, browser oturumları, yerel tokenlar ve kurum içi config commit edilmez.
 
-Readiness rules:
+## Sonraki geliştirme kuralı
 
-- RUN/sample `COMPLETED`: eligible for Clinical/SNV/CNV/Fusion/QC collection.
-- `RUNNING`, `PROCESSING`, `QUEUED`, `SUBMITTED`: WAITING, not an error.
-- `ERROR`, `FAILED`, `CANCELED`: blocked/upstream error.
-- QC `about:blank`, `The QC report could not be loaded.`, or persistent loading while upstream is not ready: WAITING and retry later.
-
-## Data collected
-
-- Runs/sample metadata and status.
-- Clinical variant view with pagination/accordion expansion.
-- Full SNV TSV, including low-VAF/filtered calls for artifact and contamination analysis.
-- CNV TSV.
-- Fusion where available.
-- MultiQC plot data via Toolbox → Export → Data → Download Plot Data.
-- TMB/MSI/HRD and available depth metadata from Runs.
-
-## Mutation analysis
-
-- Per-sample mutation viewer.
-- Global mutation search across all POOLs.
-- Oncogenic / Likely Oncogenic filters and ordering.
-- Exact-variant distribution across technical samples.
-- POOL spread analysis: source-high AF vs recipient-low AF patterns.
-- Pairwise multi-variant signatures to prioritize possible cross-sample contamination/artifact review.
-- External links to OncoKB and Franklin.
-
-The application must not label contamination as proven solely from these heuristics.
-
-## AI / reporting package
-
-The **YZ / Raporlama** tab creates a local POOL bundle for reporting review. It groups DNA/RNA runs sharing the same POOL number and exports:
-
-- POOL-level exact shared variant signals, high→low AF signals and multi-variant sample-pair signatures.
-- Per-patient diagnosis, age at diagnosis, block, tumor percentage and technical sample/rerun context.
-- TMB/MSI/HRD and available QC General Stats.
-- Oncogenic and Likely Oncogenic calls, including non-PASS observations for technical spread review.
-- Clinical summary/raw JSON and optional full MultiQC exported JSON.
-- A compact Markdown prompt plus compact/full JSON files.
-
-Direct identifiers (name/national ID) are OFF by default. `AI_EXPORT/` is local-only and git-ignored. The package is decision-support input; it must not make an autonomous contamination or final clinical reporting decision.
-
-## Patient/block metadata
-
-Case-family level:
-
-- Full name
-- National ID
-- Birth date (local-only; never exported in the AI clinical context)
-- Age at diagnosis/reporting context, derived from birth date using ENLIL request/accept date when available, otherwise first NGS date
-- Sex — authoritative source is `Hasta / Blok / Ortak Bilgiler > Cinsiyet`; ENLIL fills only when empty
-- Tumor diagnosis
-- Requesting physician
-- Reporting physician
-- Multi-line case note
-
-Technical-sample level:
-
-- Block ID
-- Tumor cell percentage
-- Technical sample note
-
-Physician fields offer suggestions from previously entered local values.
-
-## Next priorities
-
-1. Integrate QC/read-quality metrics more directly into exact-variant spread scoring and AI risk prioritization.
-2. Make rerun comparison explicit: original vs rerun AF/DP/filter concordance.
-3. Improve global mutation result drill-down and longitudinal/pool summaries.
-4. Add a safe local backup/export workflow for patient data without sending PHI to the public repository.
-5. Continue selector maintenance only from de-identified diagnostics.
-
-## Public/private boundary
-
-The public repository must never contain:
-
-- Patient names or national IDs.
-- Real sample/run UUIDs.
-- Real downloaded TSV/JSON/MultiQC contents.
-- `DATA/`, `OUTPUT/`, `AI_EXPORT/`, `PROFILE/`, `ledger.jsonl`.
-- Browser cookies/tokens/session profiles.
-- Institution/vendor-specific private URLs or credentials.
-
-The supported platform URL is supplied only through ignored `config.local.json`, legacy local `config.json`, or environment variables.
-
-
-## v0.4.42 clinical-context decisions
-
-- Do not rely on GenNext/Altium for sex when it exposes only selector placeholders.
-- `Hasta / Blok / Ortak Bilgiler > Cinsiyet` is the authoritative local source used by AI export.
-- ENLIL JAB may populate sex only if the local field is empty and a single explicit selected Male/Female value is available; ambiguous controls are ignored.
-- Birth date remains local-only. AI export gets only derived age plus the age reference date.
-- Age reference priority: ENLIL request date → ENLIL first-accept date → first NGS run date; legacy ENLIL age is fallback only.
+Yeni özellik eklerken önce domain sözleşmesine alan ekle, sonra storage migration, sonra adapter, en son UI. UI'dan doğrudan DB/ham JSON/DOM karar mantığı eklemeyin.
