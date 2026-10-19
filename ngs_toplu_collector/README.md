@@ -1,3 +1,19 @@
+# NGS Mutasyon Havuzu v0.4.83
+
+**Güncel tam kaynak çizgisi: 0.4.83.** Bu sürüm POOL YZ değerlendirme merkezini, DNA/RNA için ayrı analitik akışı, YZ önerisi–GenNext Selection–yerel patolog kararının bağımsız saklanmasını, IGV/QC/önceki rapor bağlamını ve ferah sekmeli çalışma alanını içerir.
+
+Mimariyi bozmadan geliştirmek için önce şunları okuyun:
+
+- [Mimari sözleşme](docs/ARCHITECTURE_v0483.md)
+- [YZ karar sözleşmesi ve referans formülü](docs/AI_DECISION_ENGINE_v0483.md)
+- [UI adapter sözleşmesi](docs/UI_ADAPTER_CONTRACT_v0483.md)
+- [v0.4.83 proje durumu](PROJECT_STATE_v0483.md)
+- [Tam kaynak snapshot manifesti](source_snapshot/v0.4.83/MANIFEST.md)
+
+**Kritik ilke:** YZ önerisi, GenNext Selection ve nihai rapor kararı aynı şey değildir; birbirlerini otomatik değiştirmezler.
+
+---
+
 # NGS Mutasyon Havuzu
 
 A local Python desktop application for NGS run collection, mutation review, technical rerun comparison and POOL-level variant spread analysis.
@@ -81,7 +97,7 @@ Read **[PROJECT_STATE.md](PROJECT_STATE.md)** and **[RECOVERY.md](RECOVERY.md)**
 
 ## Current version
 
-Latest validated local/hotfix line: **v0.4.42**.
+Latest validated source line: **v0.4.83**.
 
 
 ## v0.4.42 note
