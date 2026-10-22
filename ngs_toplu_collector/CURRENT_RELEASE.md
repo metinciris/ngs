@@ -1,21 +1,33 @@
-# NGS Mutasyon Havuzu — geçerli çalışan sürüm
+# NGS Mutasyon Havuzu — geçerli çalışan yerel referans
 
-**Geçerli yerel uygulama:** v0.4.84 + Rapor Arşivi V4 (tek sayfa hasta görünümü)  
-**Kullanıcı tarafından doğrulandı:** 22 Ekim 2026  
-**Güncelleme paketi:** `NGS_UPDATE_v0.4.84_RAPOR_ARSIVI_V4_TEK_SAYFA.zip`  
+**Kullanıcı tarafından onaylanan yerel kurulum:** v0.4.84 + Rapor Arşivi V5 (Selection görünümü) + Arşiv Sağ Panel Kaydırma V6  
+**Onay tarihi:** 22 Ekim 2026  
+**Yerel kurulum hedefi:** `C:\ngs\ngs_toplu_collector`  
+**Durum:** **ÇALIŞAN REFERANS / KORUNACAK YEREL KURULUM**
 
-## Geçerli kabul edilen arayüz
+## Bu kontrol noktasında onaylanan işlevler
 
-- Hasta isimleriyle başlayan, son POOL'dan eski POOL'a uzanan düz hasta listesi.
-- DNA MP ve RNA MP ile birden çok çalışma aynı hasta görünümünde.
-- Bir hastanın DNA/RNA ve varsa geçmiş raporları **aynı sayfada**, kendi tanılarıyla ayrı ayrı gösterilir.
-- Hasta demografisi, tanı, blok, imzacı doktor ve DNA biyobelirteçleri (TMB, MSI, HRD) okunabilir.
-- Üstteki arama/filtreler varsayılan olarak gizlidir.
-- T.C. kimlik numarası yalnız yerelde hasta geçmişini ilişkilendirmek için kullanılır.
-- Birden fazla teknik çalışmanın rapor metinleri birleştirilmez; güncel rapor ve eski rapor ayrımı korunur.
+- Rapor Arşivi / Hasta-Raporlar bölümünde hasta, DNA ve RNA teknik çalışma, GenNext Selection varyantları ve rapor alanları birlikte görüntülenir.
+- Sağ hasta ayrıntısı paneli dikey kaydırılır; soldaki hasta listesi sabit kalır.
+- Önceki arşiv işlevleri, hasta bağlantıları ve yerel rapor metinleri korunur.
+- Kullanıcı, bu kurulumun arayüzünü “güzel gözüküyor” diyerek çalışan/iyi sürüm olarak işaretlenmesini istemiştir.
 
-## Sürüm ve kaynak bütünlüğü hakkında
+**Son yerel yamalar:**
+- `NGS_UPDATE_v0484_RAPOR_ARSIVI_V5_SELECTION.zip`
+- `NGS_UPDATE_v0484_ARSIV_SAG_PANEL_SCROLL_V6.zip`
 
-Bu belge, kullanıcı tarafından çalışan **son geçerli yama paketini** tanımlar. Bu depodaki `ngs_toplu_collector/VERSION` ve kaynak dosyaları V4 ZIP ile **henüz tam senkronize edilmemiş olabilir**. Paket tam kaynak dağıtımı değil, mevcut v0.4.84 kurulumuna ek güncellemedir. Eski depo kaynaklarını yeniden etiketleyip V4'ün tümü GitHub'daymış gibi göstermeyin.
+## Onay kapsamı ve açık noktalar
 
-Tam GitHub kaynak senkronizasyonu için kullanılan güncel yerel v0.4.84 kaynak ağacı ile bu ZIP'in modülleri birleştirilip test edilmelidir. Hasta veritabanı, T.C. kimlikleri, raporlar ve kişisel bilgiler hiçbir zaman GitHub'a yüklenmemelidir.
+Bu onay, yukarıdaki **yerel arşiv ekranı sürümüne** aittir. Tüm canlı GenNext Selection, RNA, IGV, otomatik tarama ve 404 kurtarma yollarının uçtan uca test edildiği anlamına gelmez. Özellikle eski/yanlış `run-detail-somatic` adresleri ile gerçek `somatic-detail-clinic` bağlantıları arasındaki eşleştirme sorunları için bağımsız doğrulama gerekir.
+
+GenNext Selection, YZ önerisi ve patolog rapor kararı ayrıdır. Kimliği doğrulanmayan Selection, negatif olarak kaydedilmez. Kayıtlar `runUuid::sampleUuid::sampleType` üzerinden doğrulanır.
+
+## GitHub kaynak eşitleme durumu
+
+**DİKKAT: Henüz tam kaynak senkronizasyonu yapılmadı.** Kullanıcının Windows bilgisayarındaki en son çalışan kaynak ZIP'i alınmadan depodaki mevcut Python dosyaları ve `VERSION` bu referans sürümün eşleniği olarak kabul edilemez. Bu belge yalnız **yerel çalışan sürümün sabit referansını** işaretler.
+
+Kaynak ZIP'i alındığında, gizlilik kontrolünden geçirilerek çalışır yerel kodla karşılaştırılmalı; Python sözdizimi/temel regresyon testleri sonrasında GitHub güncellenmelidir. Eski depo kodlarını yalnız sürüm numarasını artırarak son sürümmüş gibi göstermeyin.
+
+## Gizlilik
+
+GitHub'a hiçbir zaman gerçek hasta/örnek kayıtları, T.C. kimlik bilgileri, klinik raporlar, `AI_EXPORT`, `DATA`, `OUTPUT`, `PROFILE`, `DIAGNOSTICS`, `UPDATE_BACKUPS`, tarayıcı çerezleri/oturumları, kayıtlı hesaplar, şifreler, tokenlar veya yerel özel ayarlar yüklenmez.
