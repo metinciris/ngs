@@ -3,7 +3,6 @@
 **Geçerli yerel uygulama:** v0.4.84 + Rapor Arşivi V4 (tek sayfa hasta görünümü)  
 **Kullanıcı tarafından doğrulandı:** 22 Ekim 2026  
 **Güncelleme paketi:** `NGS_UPDATE_v0.4.84_RAPOR_ARSIVI_V4_TEK_SAYFA.zip`  
-**ZIP SHA-256:** `1b0568c7e8747675f6fea172cb184cc81cd2c9ac01523d68994ccbae6b234a0c`
 
 ## Geçerli kabul edilen arayüz
 
