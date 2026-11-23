@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NGS | Bilgi ve Sistem Hafızası</title>
+<style>
+:root{color-scheme:light;--ink:#1f2937;--muted:#536274;--bg:#f4f7fb;--surface:#fff;--line:#dbe4ef;--accent:#0c607c;--accent-soft:#e9f3f8}
+*{box-sizing:border-box}body{margin:0;font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{color:var(--accent)}header{background:linear-gradient(110deg,#123348,#146580);color:white;padding:30px max(20px,calc((100vw - 1170px)/2))}header h1{font-size:clamp(24px,4vw,36px);margin:0 0 6px}header p{margin:0;color:#dbeaf2;max-width:880px}.wrap{max-width:1170px;padding:22px 20px 64px;margin:auto}.notice{padding:14px 18px;background:#fff7e7;border:1px solid #f0dba9;border-radius:12px;margin-bottom:20px}.toolbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center}.toolbar input,.toolbar select{min-height:42px;border:1px solid #aabecd;border-radius:10px;padding:8px 12px;font:inherit;background:white;color:var(--ink)}.toolbar input{flex:3 1 240px}.toolbar select{flex:1 1 170px}.count{font-size:13px;color:var(--muted)}.entry{background:var(--surface);border:1px solid var(--line);border-radius:13px;margin:12px 0;overflow:hidden;box-shadow:0 2px 6px #17394e09}.entry summary{cursor:pointer;padding:17px 20px;list-style:none;display:flex;align-items:flex-start;gap:14px}.entry summary::-webkit-details-marker{display:none}.entry summary:before{content:"+";font-weight:700;font-size:23px;color:var(--accent);line-height:1}.entry[open] summary:before{content:"−"}.entry h2{font-size:18px;line-height:1.3;margin:0 0 5px}.entry .short{margin:5px 0 0;color:var(--muted)}.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.pill{font-size:12px;font-weight:600;background:var(--accent-soft);border-radius:30px;padding:2px 9px;color:#174e62}.pill.pending{background:#fff0d3;color:#7c4b09}.inside{padding:0 21px 20px 55px;border-top:1px solid var(--line)}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 20px;margin-top:14px}.field{min-width:0}.field b{display:block;font-size:13px;color:var(--accent);margin-bottom:4px}.field p{margin:0;white-space:pre-wrap}.field.wide{grid-column:1/-1}.codes{font:13px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f3f6fb;border-radius:8px;padding:10px}.sources a{display:inline-block;margin-right:15px;margin-top:5px}.footer{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:30px}#error{color:#953333}button{border:1px solid var(--line);padding:9px 13px;border-radius:10px;background:white;color:var(--accent);font-weight:600;cursor:pointer}.utility{display:flex;gap:8px;flex-wrap:wrap}.none{padding:24px;color:var(--muted)}@media(max-width:650px){.fields{grid-template-columns:1fr}.inside{padding-left:20px}.entry summary{padding:16px}.toolbar{top:0}}
+@media print{header{background:#123348!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.toolbar,.utility{display:none}.entry{break-inside:avoid}.entry .inside{display:block}}
+</style>
+</head>
+<body><header><h1>NGS Bilgi ve Sistem Hafızası</h1><p>Teknik veri, manuel girişler, Enlil, dış kaynaklar, kod bağlantıları ve bekleyen güncellemeler: tek ve arama yapılabilir bir bilgi merkezi.</p></header>
+<main class="wrap">
+<div class="notice"><strong>Önemli:</strong> Bu sayfa yalnızca bilgi ve izlenebilirlik içindir. Gerçek hasta verisi yüklemez, veritabanına bağlanmaz ve rapor kararlarını değiştirmez. <strong>DNA derinlik güvenli güncellemesi kurulmadı.</strong></div>
+<div class="toolbar"><input type="search" id="search" aria-label="Bilgi ara" placeholder="Gen, FREEMIX, ortalama derinlik, QC, Enlil, kod adı ara..."><select id="category" aria-label="Kategori"><option value="">Tüm kategoriler</option></select><select id="status" aria-label="Durum"><option value="">Tüm durumlar</option></select></div>
+<div class="utility"><button type="button" id="expand">Tümünü aç</button><button type="button" id="collapse">Tümünü kapat</button><button type="button" id="print">Yazdır / PDF</button><button type="button" id="load">Yerel katalog seç (.json)</button><input type="file" id="file" accept=".json,application/json" hidden></div>
+<p class="count" id="count" role="status"></p><p id="error" role="alert"></p><section id="records" aria-label="Bilgi kayıtları"></section>
+<footer class="footer">Bu kaynak merkezi <code>catalog.json</code> dosyasına dayanır. Her kayıtta veri elde etme yolu, doğrulama adımları, eksik veri davranışı, ilişkili kod ve referanslar bulunur. Yerel sistemin çalışma durumunu bağımsız olarak doğrulamaz.</footer>
+</main>
+<script>
+"use strict";
+let catalog={items:[]};let view=[];
+const $=id=>document.getElementById(id);
+const plain=x=>String(x==null?"":x);
+function node(tag,cl,txt){const el=document.createElement(tag);if(cl)el.className=cl;if(txt!==undefined)el.textContent=plain(txt);return el}
+function safeURL(url){try{const u=new URL(url);return ["https:","http:"].includes(u.protocol)?u.href:null}catch{return null}}
+function render(){
+ const query=$("search").value.trim().toLocaleLowerCase("tr-TR"),cat=$("category").value,st=$("status").value;
+ view=catalog.items.filter(item=>(!cat||item.category===cat)&&(!st||item.status===st)&&(!query||JSON.stringify(item).toLocaleLowerCase("tr-TR").includes(query)));
+ const panel=$("records");panel.replaceChildren();
+ for(const item of view){
+  const details=node("details","entry");const summary=node("summary");const left=node("div");left.append(node("h2","",item.title));
+  const meta=node("div","meta");meta.append(node("span","pill",item.category));meta.append(node("span","pill"+(item.status==="KURULMADI"?" pending":""),item.status.replaceAll("_"," ")));left.append(meta);left.append(node("p","short",item.summary));summary.append(left);details.append(summary);
+  const inside=node("div","inside");const fields=node("div","fields");
+  for(const [name,key] of [["Nasıl elde edilir?","how"],["Nasıl doğrulanır?","validation"],["Eksik veya belirsiz veri","missing"]]){const f=node("div","field");f.append(node("b","",name));f.append(node("p","",item[key]));fields.append(f)}
+  const code=node("div","field wide");code.append(node("b","","İlgili kod / doküman"));code.append(node("div","codes",(item.code_refs||[]).join("\n")));fields.append(code);
+  const sources=node("div","field wide sources");sources.append(node("b","","Kaynaklar (yeni sekmede)"));
+  for(const source of (item.sources||[])){const uri=safeURL(source.url);if(!uri)continue;const a=node("a","",source.label);a.href=uri;a.target="_blank";a.rel="noopener noreferrer";sources.append(a)}
+  fields.append(sources);const date=node("div","field wide");date.append(node("b","","Katalog kontrol tarihi"));date.append(node("p","",item.checked_on||"Belirtilmedi"));fields.append(date);inside.append(fields);details.append(inside);panel.append(details)
+ }
+ $("count").textContent=view.length+" / "+catalog.items.length+" kayıt gösteriliyor.";
+ if(!view.length)panel.append(node("p","none","Bu arama ve filtrelerle eşleşen kayıt bulunamadı."));
+}
+function fillSelect(id,items){const s=$(id);while(s.options.length>1)s.remove(1);for(const item of [...new Set(items)].sort((a,b)=>a.localeCompare(b,"tr"))){const o=document.createElement("option");o.value=item;o.textContent=item.replaceAll("_"," ");s.append(o)}}
+function accept(raw){if(!raw||!Array.isArray(raw.items)||raw.items.some(i=>typeof i.title!=="string"||typeof i.category!=="string"||typeof i.status!=="string"))throw Error("Katalog yapısı geçersiz.");catalog=raw;fillSelect("category",catalog.items.map(i=>i.category));fillSelect("status",catalog.items.map(i=>i.status));$("category").value="";$("status").value="";$("error").textContent="";render()}
+$("search").addEventListener("input",render);$("category").addEventListener("change",render);$("status").addEventListener("change",render);
+$("expand").addEventListener("click",()=>document.querySelectorAll(".entry").forEach(e=>e.open=true));
+$("collapse").addEventListener("click",()=>document.querySelectorAll(".entry").forEach(e=>e.open=false));
+$("print").addEventListener("click",()=>{document.querySelectorAll(".entry").forEach(e=>e.open=true);window.print()});
+$("load").addEventListener("click",()=>$("file").click());
+$("file").addEventListener("change",async()=>{const f=$("file").files[0];if(!f)return;try{accept(JSON.parse(await f.text()))}catch(e){$("error").textContent="Dosya okunamadı: "+e.message}});
+fetch("./catalog.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("HTTP "+r.status);return r.json()}).then(accept).catch(()=>{$("error").textContent="Katalog otomatik açılamadı. 'Yerel katalog seç' düğmesinden aynı klasördeki catalog.json dosyasını açabilirsiniz."});
+</script></body></html>
