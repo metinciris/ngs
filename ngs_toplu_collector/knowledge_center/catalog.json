@@ -1,0 +1,461 @@
+{
+  "schema_version": 1,
+  "title": "NGS Mutasyon Havuzu — Bilgi ve Sistem Hafızası",
+  "prepared_on": "2026-11-23",
+  "privacy": "Yalnızca genel teknik işleyiş, kaynak bağlantıları ve örnek olmayan açıklamalar içerir. Gerçek hasta, MP/protokol, TC, RUN/örnek UUID, kurum içi uç nokta, token, QC çıktısı veya SQLite verisi içermez.",
+  "status_note": "Katalog, belgelenmiş mimariyi ve bilinen yerel geri bildirimleri ayırır. GitHub tam kaynak v0.4.83; yerel uygulama daha yenidir ve GitHub ile eşitlenmemiştir. Katalogdaki bilgi canlı sistemin anlık doğrulaması değildir.",
+  "items": [
+    {
+      "id": "giris-kaynak-hiyerarsisi",
+      "category": "Temel Mimari",
+      "title": "Kanıt, yorum ve karar birbirinden ayrılır",
+      "status": "BELGELENDI",
+      "summary": "Her değer için kaynak ve güven düzeyi korunur; sistem yorumu, laboratuvar sonucu veya klinik karar yerine geçmez.",
+      "how": "Ham kaynak → teknik örnek doğrulaması → normalizasyon → inceleme modeli → kullanıcı görünümü → gerekiyorsa yerel denetim kaydı.",
+      "validation": "Kaynak dosyası/endpoint, teknik örnek kimliği, alınma zamanı ve işleyen modül ayrı belirtilmelidir. Belirsiz ya da eksik değer kesinleştirilmez.",
+      "missing": "Bilinmiyor / veri yok / henüz çalışılmadı birbirinden ayrı durumlar olarak saklanır.",
+      "code_refs": [
+        "docs/ARCHITECTURE_v0483.md",
+        "docs/UI_ADAPTER_CONTRACT_v0483.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Mimari sözleşme",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/ARCHITECTURE_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "teknik-kimlik",
+      "category": "Temel Mimari",
+      "title": "Teknik örnek kimliği ve hasta bağlantısı",
+      "status": "BELGELENDI",
+      "summary": "Aynı görünen MP metni aynı teknik çalışma anlamına gelmez. DNA, RNA ve tekrar çalışmaları ayrı tutulur.",
+      "how": "record_key = runUuid::sampleUuid::sampleType; hasta düzeyi bağ patient_link_id; varyant düzeyi bağ variant_key.",
+      "validation": "RUN ve sample UUID ile örnek türü birlikte eşleşmelidir. Görünen POOL/MP adına bakılarak kayıt birleştirilmez.",
+      "missing": "Teknik kimlik doğrulanamıyorsa otomatik eşleştirme yapılmaz.",
+      "code_refs": [
+        "db.py",
+        "collector.py",
+        "docs/ARCHITECTURE_v0483.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Mimari sözleşme",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/ARCHITECTURE_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "runs-tarama",
+      "category": "Veri Toplama",
+      "title": "GenNext RUNS taraması ve durumlar",
+      "status": "BELGELENDI",
+      "summary": "Runs keşfi, DNA/RNA çalışma gruplaması ve tamamlanmamış işlerin WAITING olarak izlenmesi.",
+      "how": "Yerel Playwright tarayıcı profili ile RUNS sayfasına erişim; RUN/örnek tamamlanma durumu doğrulandıktan sonra Clinical, SNV, CNV, Fusion ve QC kaynağına geçilir.",
+      "validation": "Kaynak sayfa ile teknik kimlik uyuşmalı; upstream henüz hazır değilse collector hatası denmemelidir.",
+      "missing": "Tamamlanmamış veya QC açılmamış örnekler daha sonraki taramada yeniden denenir.",
+      "code_refs": [
+        "browser_worker.py",
+        "collector.py",
+        "docs/RUNS_DISCOVERY.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: README",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/README.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "dna-snv-indel",
+      "category": "Veri Toplama",
+      "title": "DNA SNV ve indel alanları",
+      "status": "BELGELENDI",
+      "summary": "Gen, transkript, cDNA/protein, varyant düzeyi alanları ve filtre bilgileri farklı veri kaynaklarından gelebilir.",
+      "how": "GenNext SNV/indel tablo/kayıtları teknik örnek kimliği altında saklanır; raporlanabilirlik ve teknik inceleme ayrı yürür.",
+      "validation": "Varyant satırını eşleştirirken genomik konum/ref/alt temelli variant_key tercih edilir; yalnız gen ya da protein adı yeterli değildir.",
+      "missing": "Unknown veya non-PASS bulguları teknik analizden sessizce silinmez; klinik anlam otomatik atanmaz.",
+      "code_refs": [
+        "collector.py",
+        "db.py",
+        "mutation_workspace.py",
+        "docs/ARCHITECTURE_v0483.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Mimari",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/ARCHITECTURE_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "dna-cnv",
+      "category": "Veri Toplama",
+      "title": "DNA CNV kayıtları",
+      "status": "BELGELENDI",
+      "summary": "Kopya sayısı artışı/kaybı ile satırdaki gen, olay ve nicel alanlar saklanır; görüntülenen durum rapor kararı değildir.",
+      "how": "CNV kaynağından teknik örneğe bağlı yapılandırılmış gen/event/fold-change/probe/level alanları alınır; varsa YZ paketinde ayrı sunulur.",
+      "validation": "Aynı RUN/örneğe aitlik ve olay tipi kontrol edilir; boş kaynak, negatif CNV sonucuna otomatik çevrilmez.",
+      "missing": "Gerçek veri yoksa 'yok' ile 'hiçbir CNV saptanmadı' aynı şekilde yazılmaz.",
+      "code_refs": [
+        "collector.py",
+        "ai_export.py",
+        "db.py"
+      ],
+      "sources": [
+        {
+          "label": "Depo: README",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/README.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "qc-multiqc-kaynak",
+      "category": "QC",
+      "title": "QC / MultiQC: veri nereden gelir?",
+      "status": "BELGELENDI",
+      "summary": "QC ekranından Export > Data üzerinden alınan ZIP/TSV/CSV/JSON tablo verileri, ilgili örnekle doğrulanarak yorumlanır.",
+      "how": "Runs sample → QC Report → MultiQC → Export > Data → Download Plot Data → kaynak ZIP/tablolar. Ayrıca raporun multiqc_data makine-okunur çıktıları olabilir.",
+      "validation": "Kaynak dosya adı değil dosya içindeki tablo ve örnek/protokol eşleşmesi esas alınır; başlık/kolon anlamı modüle göre değişir.",
+      "missing": "QC sayfası hazır değilse WAITING; dosya yoksa metrik uydurulmaz.",
+      "code_refs": [
+        "docs/QC_FLOW.md",
+        "qc_enlil.py (yerel sürümde ayrıca kontrol edilmeli)",
+        "ai_export.py"
+      ],
+      "sources": [
+        {
+          "label": "Depo: QC akışı",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/QC_FLOW.md",
+          "kind": "internal"
+        },
+        {
+          "label": "MultiQC: makine-okunur veriler",
+          "url": "https://docs.seqera.io/multiqc/usage/downstream/",
+          "kind": "external"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "qc-okuma-gc-ve-veri",
+      "category": "QC",
+      "title": "DNA teknik metrikleri: okuma, GC, temiz veri",
+      "status": "KULLANICI_BILDIRIMI",
+      "summary": "DNA teknik cümlelerinde paired-end okuma çifti, GC, filtreleme sonrası veri, duplikasyon ve FREEMIX bulunur; ortalama derinlik mevcut metinde güvenilir olarak yer almıyor.",
+      "how": "GenNext/Collector teknik verisi ile doğrulanmış MultiQC kaynak alanları birleştirilir. Hangi alanın hangi tablo/kolondan geldiği sürüme göre teyit edilir.",
+      "validation": "Read pair ile tekil read karıştırılmaz; Gb boyutu ile derinlik aynı metrik değildir. GC ve temiz veri sayıları kendi kaynak dosyasıyla eşleşmelidir.",
+      "missing": "Ortalama derinlik bulunamazsa bu değer yazılmaz; var olan cümle bozulmaz.",
+      "code_refs": [
+        "qc_enlil.py (kullanıcı paylaştığı yerel kod bilgisi)",
+        "report_sentence() (yerelde doğrulanmalı)"
+      ],
+      "sources": [
+        {
+          "label": "MultiQC: General Statistics",
+          "url": "https://github.com/MultiQC/MultiQC/blob/main/docs/markdown/reports/reports.md",
+          "kind": "external"
+        },
+        {
+          "label": "MultiQC: veri çıktıları",
+          "url": "https://docs.seqera.io/multiqc/usage/downstream/",
+          "kind": "external"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "qc-duplikasyon",
+      "category": "QC",
+      "title": "Duplikasyon yüzdesi nasıl anlaşılır?",
+      "status": "DIS_KAYNAK",
+      "summary": "Picard PERCENT_DUPLICATION, analiz edilen hizalanmış sekansların duplikat işaretlenen kesrini ifade eder; tek başına klinik geçersizlik veya kontaminasyon tanısı değildir.",
+      "how": "Picard MarkDuplicates/duplikasyon metriklerinden gelen değer MultiQC tablosunda görünebilir; ölçümün hangi araç ve kütüphane için olduğuna bakılır.",
+      "validation": "0–1 oran mı 0–100 yüzde mi olduğu kontrol edilir; iki kez 100 ile çarpılmamalıdır. Kaynak modül ve ölçü birimi saklanır.",
+      "missing": "Kaynak modül yoksa eldeki başka yüzde duplikasyon yerine kullanılmaz.",
+      "code_refs": [
+        "qc_enlil.py (yerel doğrulama gerekiyor)"
+      ],
+      "sources": [
+        {
+          "label": "GATK: DuplicationMetrics",
+          "url": "https://gatk.broadinstitute.org/hc/en-us/articles/54698850265627-DuplicationMetrics",
+          "kind": "external"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "qc-freemix",
+      "category": "QC",
+      "title": "VerifyBamID FREEMIX ve yorum sınırları",
+      "status": "DIS_KAYNAK",
+      "summary": "FREEMIX, kontaminasyon düzeyi için hesaplanmış bir tahmindir; başka örneğe ait varyantın kanıtı veya belirli bir kaynağın kesin kimliği değildir.",
+      "how": "verifyBamID/verifyBamID2 çıktılarındaki .selfSM benzeri tabloda FREEMIX alanı okunur; örneğe özgü QC bağlamında saklanır.",
+      "validation": "Oran/yüzde dönüşümü ile doğru örnek eşleşmesi kontrol edilir; örnek kontaminasyonu ve teknik artefakt değerlendirmesi ayrı yapılır.",
+      "missing": "Değer yoksa kontaminasyon sıfır diye varsayılmaz.",
+      "code_refs": [
+        "qc_enlil.py (yerel doğrulama gerekiyor)"
+      ],
+      "sources": [
+        {
+          "label": "verifyBamID2 resmî README",
+          "url": "https://github.com/Griffan/VerifyBamID",
+          "kind": "external"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "dna-derinlik-bekleyen",
+      "category": "Güncelleme Durumu",
+      "title": "DNA ortalama derinlik: 161 KB güvenli paket",
+      "status": "KURULMADI",
+      "summary": "NGS_v0495_DNA_DERINLIK_GUVENLI.zip (161 KB) oluşturulduğu ve 21 sentetik/mevcut kod testinin geçtiği bildirilmişti; kullanıcı 23.11.2026 tarihinde kurmadığını belirtti.",
+      "how": "Planlanan dar kapsamlı mantık: Collector teknik kaydı ile doğru MultiQC protokol/örnek satırı doğrulanırsa ortalama derinlik rapor cümlesine koşullu eklenir.",
+      "validation": "Kaynak dosyası, kolon anlamı, teknik kimlik, örnek/protokol eşleşmesi ve mevcut rapor gerilemesi canlı ortamda doğrulanmadan 'kurulu' denmez. Test başarısı canlı doğrulama değildir.",
+      "missing": "Eşleşme belirsizse derinlik boş kalır; RNA ve mevcut DNA QC cümleleri değişmez. Eski veriler üzerinde otomatik geriye dönük yazım yapılmaz.",
+      "code_refs": [
+        "KUR_DNA_DERINLIK.ps1 (henüz çalıştırılmadı)",
+        "report_sentence() (planlanan lokal değişiklik)",
+        "qc_enlil.py (mevcut yerel kod)"
+      ],
+      "sources": [
+        {
+          "label": "MultiQC: makine-okunur veriler",
+          "url": "https://docs.seqera.io/multiqc/usage/downstream/",
+          "kind": "external"
+        },
+        {
+          "label": "Depo: sürüm eşitleme uyarısı",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/CURRENT_RELEASE.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "rna-fuzyon-secim",
+      "category": "Veri Toplama",
+      "title": "RNA füzyonu ve Selection=0",
+      "status": "BELGELENDI",
+      "summary": "Fusion verisi ve seçilmiş füzyon kaydı farklı veri alanlarıdır. Selection=0, tek başına analitik negatif sonuç değildir.",
+      "how": "RNA/Fusion caller ve ilgili GenNext Fusion Selection kaynakları ayrı okunur; destek, partner ve breakpoint bilgileri korunur.",
+      "validation": "Doğru RNA RUN/örneği ve caller sonucu aranır; negatif yorum için analitik veri ve kalite yeterliği gerekir.",
+      "missing": "Boş Selection, 'seçilmedi' ya da 'bilinmiyor' olarak saklanır; negatif rapora dönüşmez.",
+      "code_refs": [
+        "gennext_report_selection.py",
+        "rna_qc_bundle.py",
+        "docs/ARCHITECTURE_v0483.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Mimari",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/ARCHITECTURE_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "enlil-veriler",
+      "category": "Enlil ve Manuel",
+      "title": "Enlil kaynaklı klinik ve demografik bilgiler",
+      "status": "BELGELENDI",
+      "summary": "Enlil, seçilmiş klinik alanlarda tamamlayıcı kaynaktır; yerel kullanıcı girişi öncelikli kalır ve veri kaynağı görünür olmalıdır.",
+      "how": "Yerel hasta/blok kaydı önceliklidir. Örneğin cinsiyet alanı yerelde boşsa doğrulanmış Enlil seçiminden tamamlanabilir; yaşın türetildiği tarih ayrıca belirtilmelidir.",
+      "validation": "Ad/TC yerine teknik bağ ve doğrulanmış hasta bağlantısı korunur; çelişkili kaynaklar otomatik üzerine yazılmaz.",
+      "missing": "Enlil'e erişilemiyorsa alan bilinmiyor olarak kalır, varsayılmaz.",
+      "code_refs": [
+        "patient_workspace.py",
+        "patient_ngs_history.py",
+        "README.md (yerel eski kaynak kapsamı)"
+      ],
+      "sources": [
+        {
+          "label": "Depo: README",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/README.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "manuel-hasta-blok",
+      "category": "Enlil ve Manuel",
+      "title": "Manuel girişler ve patolog notu",
+      "status": "BELGELENDI",
+      "summary": "Tanı, blok, tümör yüzdesi, ek yorum ve yerel rapor kararı için manuel alanlar önemlidir; otomatik sistem bu alanları değiştirmemelidir.",
+      "how": "Kullanıcı tarafından kaydedilen bilgiler ayrı kayıt ve varsa denetim geçmişi ile tutulur.",
+      "validation": "Değişiklik yapan ve zaman bilgisi, eski/yeni değer ve kaynağı izlenebilmelidir. Manuel alanların kamuya açık kaynak depoya taşınması yasaktır.",
+      "missing": "Manuel girilmemiş alanlar tahmin edilip kesinleştirilmez.",
+      "code_refs": [
+        "db.py",
+        "patient_workspace.py",
+        "review_workspace_store.py"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Proje durumu",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/PROJECT_STATE.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "igv-kanit",
+      "category": "YZ ve IGV",
+      "title": "IGV kanıtı, teknik görüş ve rapor kararı",
+      "status": "BELGELENDI",
+      "summary": "IGV desteği ve YZ değerlendirmesi, ayrı teknik kanıtlardır; 'IGV bekliyor' durumundaki çağrı otomatik rapora alınmaz.",
+      "how": "Varyant/teknik örnek ilişkisiyle IGV istek, görüntü ve uzman/YZ notu saklanır; kararın dayanağı görünür tutulur.",
+      "validation": "BAM/okuma sayısı, alternatif okuma desteği, yön ve artefakt ipuçları bağlamında incelenir. Görsel yokluğu 'negatif' değildir.",
+      "missing": "IGV istenmiş ama sonuçlanmamışsa inceleme bekliyor gösterilir.",
+      "code_refs": [
+        "igv_workflow_v0481.py",
+        "web_igv_evidence.py",
+        "review_workspace_store.py"
+      ],
+      "sources": [
+        {
+          "label": "Depo: Mimari",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/ARCHITECTURE_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "uc-karar",
+      "category": "YZ ve IGV",
+      "title": "Üç karar: YZ, GenNext Selection, patolog",
+      "status": "BELGELENDI",
+      "summary": "YZ önerisi ≠ GenNext Selection ≠ yerel patolog rapor kararı. Birini değiştirmek diğerini otomatik güncelleyemez.",
+      "how": "Normalleştirilmiş review modelinde her statü ve ilgili kaynak ayrı saklanır; UI bunları yan yana gösterir.",
+      "validation": "Çapraz kayıt eşleşmesi teknik record_key ve variant_key ile yapılır. Seçilmiş olmak raporlandığını tek başına göstermez.",
+      "missing": "Belirsiz/eksik değerler 'unknown' veya 'pending' kalır; karar üretilmez.",
+      "code_refs": [
+        "ai_review.py",
+        "review_workspace_store.py",
+        "mutation_workspace.py",
+        "docs/UI_ADAPTER_CONTRACT_v0483.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: UI sözleşmesi",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/UI_ADAPTER_CONTRACT_v0483.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "yz-paketi",
+      "category": "YZ ve IGV",
+      "title": "YZ değerlendirme paketi: içerik, kapsam ve mahremiyet",
+      "status": "BELGELENDI",
+      "summary": "DNA, RNA ya da DNA+RNA seçili olabilir; SOURCE_INVENTORY ve SHA256 manifest doğrulaması mümkün. Bu paket gerçek hasta verisi içerebilir.",
+      "how": "POOL/RUN seçimi + açık DNA/RNA kapsamı + klinik/SNV/CNV/Fusion/QC/IGV kaynakları → yerel AI_EXPORT paketi.",
+      "validation": "Kapsam, teknik kimlik ve dosya bütünlüğü ayrı denetlenir; eksik içerik 'tam paket' diye sunulmaz.",
+      "missing": "Yerel AI_EXPORT, RAW, DATA, OUTPUT, PROFILE, SQLite veya hasta bilgileri GitHub'a eklenmez.",
+      "code_refs": [
+        "ai_export.py",
+        "ai_export_job.py",
+        "ai_export_worker.py",
+        "docs/AI_REPORTING_EXPORT.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: README",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/README.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "rapor-cumlesi",
+      "category": "Raporlama",
+      "title": "Raporlama > Boyama teknik cümleleri",
+      "status": "KULLANICI_BILDIRIMI",
+      "summary": "Mevcut DNA/RNA rapor cümleleri korunmalıdır. Yeni QC alanı yalnız uygun ve doğrulanmışsa eklenir.",
+      "how": "Yerel rapor oluşturma fonksiyonları doğrulanmış veri modelinden cümle kurar; veri kaynağı farklıysa metin de kaynağı izleyebilmelidir.",
+      "validation": "Önce/sonra cümle gerileme testi; boş değerle eski cümle birebir korunmalı; DNA/RNA birbirine karışmamalıdır.",
+      "missing": "Belirsiz metrik otomatik doldurulmaz; önceki rapor değerleri sessizce değiştirilmez.",
+      "code_refs": [
+        "qc_enlil.py",
+        "report_sentence() (yerel kodda doğrulanmalı)"
+      ],
+      "sources": [
+        {
+          "label": "Depo: QC akışı",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/docs/QC_FLOW.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "surum-guvenligi",
+      "category": "Güncelleme Durumu",
+      "title": "GitHub kaynağı ile Windows çalışma sürümü ayrı",
+      "status": "BELGELENDI",
+      "summary": "GitHub'da doğrulanmış tam kaynak v0.4.83; CURRENT_RELEASE belgesinde daha sonraki yerel 0.4.92 çizgisi bile repo ile eşitlenmemiş. Yeni v0.4.95 yamalarının kurulu olduğu varsayılmaz.",
+      "how": "Gerçek çalışan sürüm için yerel VERSION, dosya SHA256, yama kurulum çıktısı ve gerektiğinde doğrudan kod karşılaştırması gerekir.",
+      "validation": "GitHub VERSION dosyası ile yerel Windows uygulama sürümü aynı bilgi değildir. Kurulum başarılı çıktısı ve canlı test olmadan 'aktif' denmez.",
+      "missing": "Kurulum durumu kullanıcı tarafından doğrulanana kadar 'doğrulanmadı' veya 'kurulmadı' kalır.",
+      "code_refs": [
+        "VERSION",
+        "CURRENT_RELEASE.md",
+        "RECOVERY.md"
+      ],
+      "sources": [
+        {
+          "label": "Depo: CURRENT_RELEASE",
+          "url": "https://github.com/metinciris/ngs/blob/main/ngs_toplu_collector/CURRENT_RELEASE.md",
+          "kind": "internal"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    },
+    {
+      "id": "dis-kaynak-ilkesi",
+      "category": "Dış Kaynaklar",
+      "title": "Webden elde edilen teknik bilgi nasıl saklanır?",
+      "status": "BELGELENDI",
+      "summary": "Web kaynakları 'kılavuz bilgi' olarak tutulur; canlı laboratuvar verisinin veya doğrulanmış analitik sonucun yerine geçmez.",
+      "how": "Her kayda: konu, kısa özgün sentez, resmî URL, yayıncı, erişim tarihi, hangi alan için kullanıldığı, sınırları, yerel doğrulama ihtiyacı ve sorumlu modül eklenir.",
+      "validation": "Resmî ve güncel referans tercih edilir. Kaynaktan yalnız kısa pratik sentez alınır; kapsamı aşan kesin yorum çıkarılmaz. Kaynak bağlantısı periyodik kontrol edilebilir.",
+      "missing": "Dış kaynak bağlantısı kırık ya da güncel değilse saklanır ama uyarı verilir; veri otomatik değiştirilmez.",
+      "code_refs": [
+        "knowledge_center/catalog.json",
+        "docs/BILGI_MERKEZI.md"
+      ],
+      "sources": [
+        {
+          "label": "MultiQC: veri kaynakları",
+          "url": "https://docs.seqera.io/multiqc/usage/downstream/",
+          "kind": "external"
+        },
+        {
+          "label": "GATK: Duplikasyon metrikleri",
+          "url": "https://gatk.broadinstitute.org/hc/en-us/articles/54698850265627-DuplicationMetrics",
+          "kind": "external"
+        }
+      ],
+      "checked_on": "2026-11-23"
+    }
+  ]
+}
