@@ -1,23 +1,22 @@
-# NGS Mutasyon Havuzu — çalışan yerel referans
+# NGS Mutasyon Havuzu — Kaynak sürüm kaydı (24.11.2026)
 
-**Yerel referans:** v0.4.92 (28 Ekim 2026; kullanıcı geri bildirimi: "iyi gibi")  
-**GitHub tam kaynak eşitleme durumu:** **HENÜZ TAMAMLANMADI** — depodaki Python kaynakları bu sürümün birebir eşleniği olarak kabul edilmemeli.  
-**GitHub tarihsel kaynak anlık görüntüsü:** v0.4.83  
-**Kurulum konumu:** `C:\ngs\ngs_toplu_collector`
+**Yerelde doğrulanan çalışan hat:** NGS Mutasyon Havuzu **v0.4.95** · Bilgi Atlası **v1.6** · Boyama **GenNext Web + MultiQC v1.8.0**.
 
-## v0.4.92 yerel değişiklik çizgisi
-- v0.4.85–90: GenNext oturum/404 denetimi, API gözlemi, RNA Fusion Selection sekme kontrolü ve arşiv görünürlüğü.
-- v0.4.91: teknik örnek düzeyinde manuel rapor kapanışı (pozitif, negatif, iptal, yetersiz, raporsuz kapatıldı, yeniden aç) ve denetim geçmişi.
-- v0.4.92: yalnız tarayıcının otomatik açtığı RNA sekmelerini toplama sonunda/hata halinde kapatma; manuel ve ana RUNS sekmeleri koruma.
+## Kaynakların kökeni ve doğrulama
 
-## Son kontrol (28 Ekim 2026)
-Kullanıcının iki tanı ZIP özetinde `scan_runs` ve `complete_latest` işçi sonucu `completed`, Python istisnası yoktur. Ağ trafiğinde sırasıyla 5 ve 14 HTTP 500 olayı sürmüştür. Bu nedenle her teknik kaynağın klinik olarak tamamlandığı iddia edilmez. Çevrimdışı hedefli testler geçti; canlı GenNext uçtan uca doğrulama ve geçmişte bildirilen genel teknik kimlik testi sorunu açık kalmıştır.
+Bu sürümde ana dizindeki **90 dosya**, 24.11.2026 13:59 tarihli kullanıcının **doğrudan çalışan Windows kurulumundan** oluşturduğu `NGS_KAYNAK_YALNIZ_KOD_20261124_135912.zip` paketinden alındı. Her dosyanın SHA-256 değeri, aynı tarihli kullanıcı kontrol raporundaki değerle karşılaştırıldı ve eşleşti. Python dosyaları sözdizimi açısından derlendi.
 
-## Raporun kesinleşmesi
-`GenNext Analyzed`, `GenNext Selection`, `YZ önerisi` ve `yerel patolog rapor kararı` birbirinden bağımsızdır. `Selection=0`, tek başına negatif değildir. Kullanıcı tarafından rapor sonucu doğrulanınca ayrı kaydedilir. Manuel negatif kapatma oturumun elektronik imzalandığını kanıtlamaz.
+**BİLİNEN EKSİKLİK — Tam kurulabilir sürüm değildir:** Dışa aktarıcı, içerikteki hassas olabilecek sabit metinleri gördüğü için **37 ek Python dosyasını pakete hiç koymadı**. Bunlar arasında `collector.py`, `qc_enlil.py` ve `ngs_boyama_web_hybrid_v180.py` gibi programın çalışması için kritik dosyalar vardır. Bu dosyalar bu kaynak güncellemesinde *kullanıcının canlı sürümü olarak yayımlanmadı*. Bu depo ve buradaki kaynak alt kümesi, Windows'daki çalışan klasörün eksiksiz kopyası olarak yorumlanmamalıdır.
 
-## Sonraki adım
-[v0.5 Yol Haritası](docs/ROADMAP_v0.5.md): API öncelikli doğrulanabilir veri toplama, UUID koruması, kapsamlı DNA/RNA rapor arşivi ve yeniden denenebilir eksik iş kuyruğu.
+## Boyama QC'nin yerelde doğrulanan akışı
 
-## Kaynak eşitlemesi için yayın koşulu
-Gerçek v0.4.92 kaynak arşivinin gizlilik incelemesi, dosya bütünlüğü, test ve ana dalla fark karşılaştırması tamamlanmadan depodaki `VERSION` veya eski Python kodları 0.4.92 olarak etiketlenmez. Hasta/örnek bilgileri, çalışma veritabanı, gerçek UUID, PROFILE, DIAGNOSTICS, özel ayarlar, tokenlar veya raporlar GitHub'a yüklenmez.
+- GenNext RUN Detail / **QC Summary**: aynı RUN + DNA + örnek kimliğine bağlı ortalama/medyan kapsama, kapsama eşikleri ve ortalama okuma uzunluğu.
+- **MultiQC**: web sayfasında bulunmayan, doğrulanmış GC, temiz veri, duplikasyon ve VerifyBAMID FREEMIX verilerini aynı teknik kayıtla eşleştiğinde tamamlama.
+- Çelişen farklı analiz kapsamları, yanlış RUN veya farklı hastanın QC verisi rapora otomatik yazılmaz. Otomatik üretilen teknik değerler klinik rapor onayı değildir.
+- Kullanıcı, bu düzenin MP173-26, MP268-26, MP288-26 için Boyama paragrafı oluşturduğunu bildirdi. Bu kaynak arşivinin başka bilgisayarda kurulup çalıştırıldığı test edilmemiştir.
+
+## Güvenlik ve eksik dosyalar
+
+`DATA`, `OUTPUT`, `PROFILE`, `AI_EXPORT`, `IGV_SNAPSHOTS`, QC ZIP'leri, veritabanları, vaka veri dosyaları, raporlar, parolalar, profil/oturum dosyaları ve kullanıcının dışa aktarma kontrol raporu **GitHub'a alınmadı**. Dışa aktarma filtresi 37 hassas olabilecek kaynak dosyasını da dışarıda bıraktı; bunlar için ayrı bir kod/gizlilik incelemesi gerekir.
+
+**Korunan kural:** Çalışan Windows sürümü, yalnızca GitHub'daki bu kaynak alt kümesinden yeniden kurulmaya çalışılarak üzerine yazılmamalıdır.
