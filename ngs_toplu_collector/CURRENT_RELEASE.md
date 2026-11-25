@@ -13,7 +13,7 @@ Bu sürümde ana dizindeki **90 dosya**, 24.11.2026 13:59 tarihli kullanıcını
 - GenNext RUN Detail / **QC Summary**: aynı RUN + DNA + örnek kimliğine bağlı ortalama/medyan kapsama, kapsama eşikleri ve ortalama okuma uzunluğu.
 - **MultiQC**: web sayfasında bulunmayan, doğrulanmış GC, temiz veri, duplikasyon ve VerifyBAMID FREEMIX verilerini aynı teknik kayıtla eşleştiğinde tamamlama.
 - Çelişen farklı analiz kapsamları, yanlış RUN veya farklı hastanın QC verisi rapora otomatik yazılmaz. Otomatik üretilen teknik değerler klinik rapor onayı değildir.
-- Kullanıcı, bu düzenin MP173-26, MP268-26, MP288-26 için Boyama paragrafı oluşturduğunu bildirdi. Bu kaynak arşivinin başka bilgisayarda kurulup çalıştırıldığı test edilmemiştir.
+- Boyama paragrafının üç yerel test olgusunda oluşturulduğu bildirildi. Bu kaynak arşivinin başka bilgisayarda kurulup çalıştırıldığı test edilmemiştir.
 
 ## Güvenlik ve eksik dosyalar
 
